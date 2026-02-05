@@ -108,8 +108,6 @@ function love.update(dt)
             gUpdateAvailable = true
             gUpdateFiles = msg.data.files
             print("Update Available: " .. msg.data.version)
-        -- We ignore other messages here (progress, error) as they are handled by UpdateState when active
-        -- or just ignored during background check
         end
     end
 end

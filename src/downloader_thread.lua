@@ -16,15 +16,37 @@ local ltn12 = require 'ltn12'
 local https_available, https = pcall(require, 'ssl.https')
 
 -- Helper: Universal Request function
+-- Helper: Universal Request function
 local function request(url, sink)
-    if url:sub(1, 5) == "https" then
-        if https_available then
-            return https.request{ url = url, sink = sink }
-        else
-            return nil, "HTTPS not supported (missing LuaSec)"
+    -- 1. Try LuaSec (Native HTTPS)
+    if url:sub(1, 5) == "https" and https_available then
+        return https.request{ url = url, sink = sink }
+    end
+    
+    -- 2. Try HTTP (LuaSocket) - only works if URL is http
+    if url:sub(1, 5) ~= "https" then
+         return http.request{ url = url, sink = sink }
+    end
+
+    -- 3. Fallback: Curl (for HTTPS without LuaSec)
+    -- This is common on Windows/LÖVE where LuaSec isn't bundled
+    local command = 'curl -s -L "' .. url .. '"'
+    local handle = io.popen(command, 'rb')
+    if not handle then
+        return nil, "curl failed to start"
+    end
+    
+    local content = handle:read("*a")
+    handle:close()
+    
+    if content then
+        -- Feed content to sink
+        if sink then
+            sink(content)
         end
+        return 1, 200 -- Simulate success code
     else
-        return http.request{ url = url, sink = sink }
+        return nil, "curl returned no content"
     end
 end
 
