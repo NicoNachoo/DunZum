@@ -1393,8 +1393,8 @@ function PlayState:renderUI()
     -- Tutorial Overlay
     if self.showTutorial then
         local step = self.tutorialSteps[self.tutorialStep]
-        local overlayW = 500
-        local overlayH = 250
+        local overlayW = 500 * layoutScale
+        local overlayH = 250 * layoutScale
         local overlayX = (winW - overlayW) / 2
         local overlayY = (winH - overlayH) / 2
         
@@ -1418,9 +1418,10 @@ function PlayState:renderUI()
         love.graphics.printf(step.text, overlayX + 40, overlayY + 80, overlayW - 80, 'center')
         
         -- Click to continue
+        love.graphics.setFont(getNativeFont(10))
         love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.printf("Click or Press SPACE to continue (" .. self.tutorialStep .. "/" .. #self.tutorialSteps .. ")", 
-            overlayX, overlayY + overlayH - 40, overlayW, 'center')
+            overlayX, overlayY + overlayH - 30, overlayW, 'center')
     end
 end
 
