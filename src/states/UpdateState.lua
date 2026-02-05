@@ -34,6 +34,11 @@ function UpdateState:new()
     -- Use global thread/channels
     self.commandChannel = love.thread.getChannel('update_commands')
     self.statusChannel = love.thread.getChannel('update_status')
+    
+    -- Load same background as menu
+    if love.filesystem.getInfo('imgs/menu.png') then
+        self.background = love.graphics.newImage('imgs/menu.png')
+    end
 end
 
 function UpdateState:enter()
@@ -94,12 +99,10 @@ function UpdateState:update(dt)
             self.nextState = 'menu'
             
         elseif msg.type == 'complete' then
-            self.statusText = "Update Complete! Restarting..."
+            self.statusText = "Update Complete! Press 'R' to Restart."
             self.complete = true
-            
-            self.transitioning = true
-            self.transitionTimer = 2
-            self.restart = true
+            -- Disable auto-restart to debug crash
+            -- self.restart = true
         end
     end
     
@@ -113,55 +116,93 @@ function UpdateState:update(dt)
     if self.transitioning then
         self.transitionTimer = self.transitionTimer - dt
         if self.transitionTimer <= 0 then
-            if self.restart then
-                love.event.quit("restart")
-            elseif self.nextState then
+            if self.nextState then
                 gStateMachine:change(self.nextState)
             end
         end
     end
+    
+    -- Manual Restart
+    if self.complete and love.keyboard.isDown('r') and not self.restarting then
+         self.restarting = true
+         self.statusText = "Restarting..."
+         
+         -- Gracefully stop thread
+         self.commandChannel:push({command='quit'})
+         gUpdateThread:wait()
+         
+         love.event.quit("restart")
+    end
 end
 
-function UpdateState:render()
-    -- Draw Background (reuse menu background if available, or just black)
-    love.graphics.clear(0.1, 0.1, 0.1, 1)
+function UpdateState:renderUI()
+    -- Draw Background
+    if self.background then
+        local winW = love.graphics.getWidth()
+        local winH = love.graphics.getHeight()
+        local scale = math.max(winW / self.background:getWidth(), winH / self.background:getHeight())
+        love.graphics.setColor(0.5, 0.5, 0.5, 1) -- Dimmed
+        love.graphics.draw(self.background, 0, 0, 0, scale, scale)
+    else
+        love.graphics.clear(0.1, 0.1, 0.1, 1)
+    end
     
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
+    
+    -- Semi-transparent Overlay
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle('fill', 0, 0, width, height)
+    
+    -- Modal Box
+    local boxW, boxH = 500, 200
+    local boxX = (width - boxW) / 2
+    local boxY = (height - boxH) / 2
+    
+    -- Box Background
+    love.graphics.setColor(0.15, 0.15, 0.2, 1)
+    love.graphics.rectangle('fill', boxX, boxY, boxW, boxH, 10, 10)
+    
+    -- Box Border
+    love.graphics.setColor(1, 1, 1, 0.5)
+    love.graphics.rectangle('line', boxX, boxY, boxW, boxH, 10, 10)
     
     love.graphics.setFont(gFonts['medium'])
     love.graphics.setColor(1, 1, 1, 1)
     
     if self.error then
         love.graphics.setColor(1, 0.2, 0.2, 1)
-        love.graphics.printf("Update Failed", 0, height/2 - 60, width, 'center')
+        love.graphics.printf("Update Failed", boxX, boxY + 40, boxW, 'center')
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.setFont(gFonts['small'])
-        love.graphics.printf(self.error, 0, height/2 - 20, width, 'center')
-        love.graphics.printf("Continuing to game...", 0, height/2 + 20, width, 'center')
+        love.graphics.printf(self.error, boxX + 20, boxY + 80, boxW - 40, 'center')
+        love.graphics.printf("Continuing to game...", boxX, boxY + 140, boxW, 'center')
     else
-        love.graphics.printf(self.statusText, 0, height/2 - 40, width, 'center')
+        love.graphics.printf("SYSTEM UPDATE", boxX, boxY + 30, boxW, 'center')
+        
+        love.graphics.setFont(gFonts['small'])
+        love.graphics.printf(self.statusText, boxX, boxY + 70, boxW, 'center')
         
         -- Progress Bar
+        local barW = 400
+        local barH = 20
+        local barX = (width - barW) / 2
+        local barY = boxY + 110
+        
+        love.graphics.setColor(0.1, 0.1, 0.1, 1)
+        love.graphics.rectangle('fill', barX, barY, barW, barH)
+        
         if self.progress > 0 then
-            local barW = 400
-            local barH = 20
-            local barX = (width - barW) / 2
-            local barY = height/2 + 20
-            
-            love.graphics.setColor(0.2, 0.2, 0.2, 1)
-            love.graphics.rectangle('fill', barX, barY, barW, barH)
-            
             love.graphics.setColor(0.2, 0.8, 0.2, 1)
             love.graphics.rectangle('fill', barX, barY, barW * self.progress, barH)
-            
-            love.graphics.setColor(1, 1, 1, 1)
-            love.graphics.rectangle('line', barX, barY, barW, barH)
-            
-            if self.currentFile ~= "" then
-                love.graphics.setFont(gFonts['small'])
-                love.graphics.printf("Downloading: " .. self.currentFile, 0, barY + 30, width, 'center')
-            end
+        end
+        
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.rectangle('line', barX, barY, barW, barH)
+        
+        if self.currentFile ~= "" then
+            love.graphics.setFont(gFonts['tiny'])
+            love.graphics.printf("Processing: " .. self.currentFile, boxX, barY + 30, boxW, 'center')
         end
     end
     

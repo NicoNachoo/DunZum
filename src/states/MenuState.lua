@@ -59,6 +59,15 @@ function MenuState:update(dt)
     end
     
     self.timer = self.timer + dt
+    
+    -- Dynamic Update Notification
+    if gUpdateAvailable then
+        for _, item in ipairs(self.menuItems) do
+            if item.text == "UPDATE CLIENT" then
+                item.text = "UPDATE CLIENT (+)"
+            end
+        end
+    end
 end
 
 function MenuState:keypressed(key)
