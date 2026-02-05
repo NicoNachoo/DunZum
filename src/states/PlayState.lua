@@ -1113,7 +1113,62 @@ function PlayState:renderUI()
         else return gFonts['huge'] end                         -- 48px
     end
     
-    -- ... (rest of renderUI) ...
+    -- UI: Castle Health
+    love.graphics.setFont(getNativeFont(16))
+    love.graphics.printf(self.castleHealth .. " Hearts", winW - (220 * layoutScale), 20 * layoutScale, 200 * layoutScale, 'right', 0, 1, 1)
+    
+    -- UI: Souls
+    love.graphics.setColor(0.8, 0.4, 1, 1) -- Purple
+    love.graphics.printf(self.souls .. " Souls", winW - (220 * layoutScale), 50 * layoutScale, 200 * layoutScale, 'right', 0, 1, 1)
+    
+    -- UI: Wave
+    love.graphics.setColor(1, 1, 0, 1) -- Yellow
+    love.graphics.print('Wave: ' .. self.wave, winW / 2 - (50 * layoutScale), 20 * layoutScale, 0, 1, 1)
+    love.graphics.setColor(1, 1, 1, 1)
+    
+    -- UI: Typing Buffer
+    if self.isTyping then
+        love.graphics.setFont(getNativeFont(16))
+        
+        local bufferW = 400 * layoutScale
+        local bufferH = 60 * layoutScale
+        local bufferX = (winW - bufferW) / 2
+        local bufferY = winH - (100 * layoutScale)
+        
+        -- Draw background for text buffer (Chunky pixel look)
+        love.graphics.setColor(0, 0, 0, 0.8)
+        love.graphics.rectangle('fill', bufferX, bufferY, bufferW, bufferH, 10 * layoutScale)
+        
+        love.graphics.setColor(1, 0.8, 0, 1) -- Gold border
+        love.graphics.setLineWidth(2 * layoutScale)
+        love.graphics.rectangle('line', bufferX, bufferY, bufferW, bufferH, 10 * layoutScale)
+        love.graphics.setLineWidth(1)
+        
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf(
+            self.inputBuffer, 
+            bufferX, 
+            bufferY + (15 * layoutScale), 
+            bufferW, 
+            'center'
+        )
+        
+        -- Helper line when typing
+        love.graphics.setFont(getNativeFont(10))
+        love.graphics.setColor(1, 1, 1, 0.6)
+        love.graphics.printf("TYPE UNIT NAME AND ENTER", bufferX, bufferY + bufferH + (5 * layoutScale), bufferW, 'center')
+    else
+        love.graphics.setFont(getNativeFont(10))
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.printf(
+            "W/S: Select Lane | ENTER: Summon | TAB: Grimoire", 
+            0, 
+            winH - (30 * layoutScale), 
+            winW, 
+            'center'
+        )
+        love.graphics.setColor(1, 1, 1, 1)
+    end
 
     -- UI: Grimoire Overlay (Animated Book)
 
