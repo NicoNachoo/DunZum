@@ -1,0 +1,26 @@
+# System Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Lua
+*.luac
+
+# Python (Manifest Script)
+__pycache__/
+*.py[cod]
+
+# LÖVE Build Artifacts
+*.love
+*.exe
+/build/
+/dist/
+/bin/
+
+# Local Configuration (if any)
+local_config.lua
