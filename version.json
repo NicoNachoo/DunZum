@@ -1,5 +1,5 @@
 {
-    "version": "0.1.4",
+    "version": "0.1.5",
     "files": [
         {
             "path": "main.lua",
@@ -24,7 +24,7 @@
         {
             "path": "src/downloader_thread.lua",
             "url": "https://niconachoo.github.io/DunZum/src/downloader_thread.lua",
-            "md5": "b67234bc08da9934801f834f04ec2934"
+            "md5": "a170d9716f4935b011bfda815079cdf4"
         },
         {
             "path": "src/Grimoire.lua",
@@ -44,7 +44,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "fe83259aecd230bef5d4ee7cec0901cb"
+            "md5": "9fe7a188be4db072baa7ecf836ea8381"
         },
         {
             "path": "src/Demon.lua",
@@ -89,7 +89,7 @@
         {
             "path": "src/states/MenuState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/MenuState.lua",
-            "md5": "afd50e5b17f688eb96bf684236639a05"
+            "md5": "8ec5416987fdc8a1243c709994392b49"
         },
         {
             "path": "src/states/PauseState.lua",
@@ -99,7 +99,7 @@
         {
             "path": "src/states/UpdateState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/UpdateState.lua",
-            "md5": "5f94fa53d96b958391887f660aaac631"
+            "md5": "2221832846d617a48f9304505e12d5ff"
         },
         {
             "path": "src/states/UpgradeState.lua",
