@@ -21,13 +21,21 @@ function love.load()
     
     local largeFont = love.graphics.newFont('fonts/pixel.ttf', 32)
     largeFont:setFilter('nearest', 'nearest')
+
+    local xlargeFont = love.graphics.newFont('fonts/pixel.ttf', 24)
+    xlargeFont:setFilter('nearest', 'nearest')
+    
+    local hugeFont = love.graphics.newFont('fonts/pixel.ttf', 48)
+    hugeFont:setFilter('nearest', 'nearest')
     
     gFonts = {
         ['tiny'] = tinyFont,
         ['small'] = smallFont,
         ['medium_small'] = mediumSmallFont,
         ['medium'] = mediumFont,
-        ['large'] = largeFont
+        ['xlarge'] = xlargeFont, -- 24px
+        ['large'] = largeFont,   -- 32px
+        ['huge'] = hugeFont      -- 48px
     }
     love.graphics.setFont(gFonts['small'])
     

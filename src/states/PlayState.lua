@@ -1097,71 +1097,24 @@ function PlayState:renderUI()
     else
         love.graphics.setColor(1, 1, 1, 1)
     end
-    -- Resolution Scale (Base 1280x720)
+    -- Resolution Scale for manual offsets (Base: 1280x720)
     local resolutionScale = winW / 1280
+    local layoutScale = math.max(1, winH / 720)
 
-    love.graphics.setFont(gFonts['medium'])
-    love.graphics.printf(self.castleHealth .. " Hearts", winW - (220 * resolutionScale), 20 * resolutionScale, 200, 'right', 0, resolutionScale, resolutionScale)
-    
-    -- UI: Souls
-    love.graphics.setColor(0.8, 0.4, 1, 1) -- Purple
-    love.graphics.printf(self.souls .. " Souls", winW - (220 * resolutionScale), 50 * resolutionScale, 200, 'right', 0, resolutionScale, resolutionScale)
-    
-    -- UI: Wave
-    love.graphics.setColor(1, 1, 0, 1) -- Yellow
-    love.graphics.print('Wave: ' .. self.wave, winW / 2 - (50 * resolutionScale), 20 * resolutionScale, 0, resolutionScale, resolutionScale)
-    love.graphics.setColor(1, 1, 1, 1)
-    
-    -- UI: Typing Buffer
-    if self.isTyping then
-        love.graphics.setFont(gFonts['medium'])
-        
-        local bufferW = 400 * resolutionScale
-        local bufferH = 60 * resolutionScale
-        local bufferX = (winW - bufferW) / 2
-        local bufferY = winH - (100 * resolutionScale)
-        
-        -- Draw background for text buffer (Chunky pixel look)
-        love.graphics.setColor(0, 0, 0, 0.8)
-        love.graphics.rectangle('fill', bufferX, bufferY, bufferW, bufferH, 10 * resolutionScale)
-        
-        love.graphics.setColor(1, 0.8, 0, 1) -- Gold border
-        love.graphics.setLineWidth(2 * resolutionScale)
-        love.graphics.rectangle('line', bufferX, bufferY, bufferW, bufferH, 10 * resolutionScale)
-        love.graphics.setLineWidth(1)
-        
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.printf(
-            self.inputBuffer, 
-            bufferX, 
-            bufferY + (15 * resolutionScale), 
-            bufferW / resolutionScale, 
-            'center',
-            0,
-            resolutionScale,
-            resolutionScale
-        )
-        
-        -- Helper line when typing
-        love.graphics.setFont(gFonts['small'])
-        love.graphics.setColor(1, 1, 1, 0.6)
-        love.graphics.printf("TYPE UNIT NAME AND ENTER", bufferX, bufferY + bufferH + (5 * resolutionScale), bufferW / resolutionScale, 'center', 0, resolutionScale, resolutionScale)
-    else
-        love.graphics.setFont(gFonts['small'])
-        love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.printf(
-            "W/S: Select Lane | ENTER: Summon | TAB: Grimoire", 
-            0, 
-            winH - (30 * resolutionScale), 
-            winW / resolutionScale, 
-            'center',
-            0,
-            resolutionScale,
-            resolutionScale
-        )
-        love.graphics.setColor(1, 1, 1, 1)
+    -- Helper to pick native font size
+    local function getNativeFont(baseSize)
+        local target = baseSize * layoutScale
+        if target <= 7 then return gFonts['tiny']
+        elseif target <= 10 then return gFonts['small']
+        elseif target <= 14 then return gFonts['medium_small'] -- 12px base (at 720p)
+        elseif target <= 20 then return gFonts['medium']       -- 16px base (at 720p)
+        elseif target <= 28 then return gFonts['xlarge']       -- 24px
+        elseif target <= 40 then return gFonts['large']        -- 32px
+        else return gFonts['huge'] end                         -- 48px
     end
     
+    -- ... (rest of renderUI) ...
+
     -- UI: Grimoire Overlay (Animated Book)
 
     if self.grimoireY < winH then
@@ -1169,7 +1122,6 @@ function PlayState:renderUI()
         local imgH = self.bookImage:getHeight()
         
         -- Target size based on Screen Height (110% of screen - Massive close-up)
-        -- renderUI is in Window Coordinates (e.g. 1280x720), not Virtual (432x243)
         local targetH = winH * 1.1
         local scale = targetH / imgH
         
@@ -1178,7 +1130,7 @@ function PlayState:renderUI()
         
         local bookX = math.floor((winW - bookW) / 2)
         -- Add floating animation (Sine wave: Speed 2, Amplitude 10)
-        local floatOffset = math.sin(self.grimoireFloatTimer * 2) * 10
+        local floatOffset = math.sin(self.grimoireFloatTimer * 2) * (10 * layoutScale)
         local bookY = math.floor(self.grimoireY + floatOffset)
         
         -- Draw Book Image
@@ -1186,9 +1138,9 @@ function PlayState:renderUI()
         love.graphics.draw(self.bookImage, bookX, bookY, 0, scale, scale)
         
         -- Page Layout Calculations (Relative to book size on screen)
-        local marginX = bookW * 0.22   -- 22% side margin (Shifts text right, narrows width)
-        local marginY = bookH * 0.30   -- 30% vertical margin
-        local gutter = bookW * 0.12    -- 12% center gap
+        local marginX = bookW * 0.22 
+        local marginY = bookH * 0.30 
+        local gutter = bookW * 0.12  
             
         local contentX = math.floor(bookX + marginX)
         local contentY = math.floor(bookY + marginY)
@@ -1205,41 +1157,39 @@ function PlayState:renderUI()
         
         if spellKey == 'UPGRADES_LOG' then
             -- Left Page Title
-            love.graphics.setColor(0.2, 0.1, 0, 1) -- Ink Color
-            love.graphics.setFont(gFonts['medium'])
+            love.graphics.setColor(0.2, 0.1, 0, 1) 
+            love.graphics.setFont(getNativeFont(16)) -- Base 16px
             love.graphics.printf("Grimoire\nof Boons", contentX, contentY, pageWidth, 'center')
             
             -- Central Illustration (Pentagram Image)
             local centerX = contentX + pageWidth / 2
-            local centerY = contentY + 160 -- Vertically centered in top half
+            local centerY = contentY + (160 * layoutScale) 
             
             love.graphics.setColor(1, 1, 1, 1)
-            local targetSize = 150 -- Bigger
+            local targetSize = 150 * layoutScale
             local uScale = targetSize / self.upgradeIcon:getWidth()
             love.graphics.draw(self.upgradeIcon, centerX, centerY, 0, uScale, uScale, self.upgradeIcon:getWidth()/2, self.upgradeIcon:getHeight()/2)
             
             -- Right Page: The List
-            -- rightPageX already calculated
             local rightPageW = pageWidth
             
             love.graphics.setColor(0.2, 0.1, 0, 1)
-            love.graphics.setFont(gFonts['small'])
             
             if #self.selectedUpgrades == 0 then
+                love.graphics.setFont(getNativeFont(10))
                 love.graphics.printf("No boons yet claimed...", rightPageX, contentY, rightPageW, 'center')
             else
-                local maxVisibleBoons = 4
+                local maxVisibleBoons = 4 
                 local numBoons = #self.selectedUpgrades
                 local maxScroll = math.max(0, numBoons - maxVisibleBoons)
                 
-                -- Clamp scroll offset
                 self.boonScrollOffset = math.max(0, math.min(maxScroll, self.boonScrollOffset))
                 
-                -- Show scroll indicator at top if scrolled down
+                -- Scroll Indicator Top
                 if self.boonScrollOffset > 0 then
                     love.graphics.setColor(0.5, 0.3, 0.1, 1)
-                    love.graphics.setFont(gFonts['small'])
-                    love.graphics.printf("▲ More above (W to scroll up)", rightPageX, contentY - 15, rightPageW, 'center')
+                    love.graphics.setFont(getNativeFont(10))
+                    love.graphics.printf("▲ More above (W to scroll up)", rightPageX, contentY - (20 * layoutScale), rightPageW, 'center')
                 end
                 
                 local yOffset = contentY
@@ -1249,50 +1199,50 @@ function PlayState:renderUI()
                 for i = startIndex, endIndex do
                     local upgrade = self.selectedUpgrades[i]
                     
-                    love.graphics.setFont(gFonts['small'])
+                    love.graphics.setFont(getNativeFont(10)) -- Base 12px
                     love.graphics.setColor(0.3, 0.1, 0.05, 1)
                     
-                    -- Display name with count if > 1
                     local displayName = upgrade.name
                     if upgrade.count and upgrade.count > 1 then
                         displayName = displayName .. " x" .. upgrade.count
                     end
                     
-                    love.graphics.print("- " .. displayName, rightPageX, yOffset + 15)
-                    yOffset = yOffset + 20
+                    love.graphics.print("- " .. displayName, rightPageX, yOffset + (10 * layoutScale))
+                    yOffset = yOffset + (25 * layoutScale) 
                     
-                    love.graphics.setFont(gFonts['small'])
+                    love.graphics.setFont(getNativeFont(10)) 
                     love.graphics.setColor(0.4, 0.3, 0.2, 1)
-                    love.graphics.printf(upgrade.desc, rightPageX + 10, yOffset + 15, rightPageW - 10, 'left')
-                    yOffset = yOffset + 45
+                    love.graphics.printf(upgrade.desc, rightPageX + (10 * layoutScale), yOffset + (5 * layoutScale), rightPageW - (10 * layoutScale), 'left')
+                    yOffset = yOffset + (55 * layoutScale) 
                 end
                 
-                -- Show scroll indicator at bottom if there are more boons below
+                -- Scroll Indicator Bottom
                 if self.boonScrollOffset < maxScroll then
                     love.graphics.setColor(0.5, 0.3, 0.1, 1)
-                    love.graphics.setFont(gFonts['small'])
-                    love.graphics.printf("▼ More below (S to scroll down)", rightPageX, yOffset + 5, rightPageW, 'center')
+                    love.graphics.setFont(getNativeFont(10))
+                    love.graphics.printf("▼ More below (S to scroll down)", rightPageX, yOffset + (10 * layoutScale), rightPageW, 'center')
                 end
             end
             
-            -- Footer: Navigation text on left page
-            love.graphics.setFont(gFonts['small'])
+            -- Footer
+            love.graphics.setFont(getNativeFont(10))
             love.graphics.setColor(0.4, 0.3, 0.2, 1)
-            love.graphics.printf("A/D to flip pages", bookX * 1.2, bookY + bookH * 0.66, bookW/2, 'center')
+            love.graphics.printf("A/D to flip pages", bookX + marginX, bookY + bookH - marginY - (35 * layoutScale), pageWidth, 'center')
+            
         elseif spell then
             -- Left Page: Illustration & Name
-            love.graphics.setColor(0.2, 0.1, 0, 1) -- Ink Color
-            love.graphics.setFont(gFonts['medium'])
-            love.graphics.printf(spellKey, contentX, contentY, pageWidth / scale, 'center', 0, scale, scale)
+            love.graphics.setColor(0.2, 0.1, 0, 1) 
+            love.graphics.setFont(getNativeFont(16)) -- Base 16px
+            love.graphics.printf(spellKey, contentX, contentY, pageWidth, 'center')
             
-            -- Small visual icon (Colored rectangle or sprite)
-            local iconSize = 80 * scale -- Scaling icon size
+            -- Icon
+            local iconSize = 80 * scale 
             local iconX = math.floor(contentX + (pageWidth / 2) - (iconSize/2))
-            local iconY = math.floor(contentY + (100 * scale))
+            local iconY = math.floor(contentY + (40 * layoutScale))
             
             if spellKey == 'IMP' then
                 love.graphics.setColor(1, 1, 1, 1)
-                local s = iconSize / 64 -- Local sprite scale
+                local s = iconSize / 64
                 love.graphics.draw(Demon.impSprite, Demon.impQuads[self.grimoireAnimFrame], iconX, iconY, 0, s, s)
             else
                 if spell.color then
@@ -1306,11 +1256,10 @@ function PlayState:renderUI()
             end
             
             -- Right Page: Details
-            -- rightPageX already calculated
             local rightPageW = pageWidth
             
-            love.graphics.setColor(0.2, 0.1, 0, 1) -- Ink Color
-            love.graphics.setFont(gFonts['medium'])
+            love.graphics.setColor(0.2, 0.1, 0, 1)
+            love.graphics.setFont(getNativeFont(16)) -- Base 16px for Title
             
             local nameText = spell.name
             if spell.type == 'summon' then
@@ -1319,10 +1268,10 @@ function PlayState:renderUI()
                 nameText = "Upgrade " .. nameText
             end
             
-            love.graphics.printf(nameText, rightPageX, contentY, rightPageW / scale, 'left', 0, scale, scale)
+            love.graphics.printf(nameText, rightPageX, contentY, rightPageW, 'left')
             
-            love.graphics.setFont(gFonts['small'])
-            local yOffset = contentY + (100 * scale)
+            love.graphics.setFont(getNativeFont(10)) -- Base 12px for Body
+            local yOffset = contentY + (60 * layoutScale)
             
             local displayCost = spell.cost
             if spell.type == 'upgrade' then
@@ -1335,28 +1284,28 @@ function PlayState:renderUI()
             else 
                 costText = costText .. " Mana" 
             end
-            love.graphics.print(costText, rightPageX, yOffset, 0, scale, scale)
+            love.graphics.print(costText, rightPageX, yOffset)
             
             if spell.attackRange then
-                love.graphics.print("Range: " .. spell.attackRange, rightPageX, yOffset + (20 * scale), 0, scale, scale)
+                love.graphics.print("Range: " .. spell.attackRange, rightPageX, yOffset + (20 * layoutScale))
             end
             
             if spell.speed then
-                love.graphics.print("Speed: " .. spell.speed, rightPageX, yOffset + (40 * scale), 0, scale, scale)
+                love.graphics.print("Speed: " .. spell.speed, rightPageX, yOffset + (40 * layoutScale))
             end
             
             -- Description
             if spell.description then
-                love.graphics.setColor(0.3, 0.2, 0.1, 1) -- Slightly lighter ink for description
-                love.graphics.setFont(gFonts['small'])
-                local descYOffset = yOffset + (70 * scale)
-                love.graphics.printf(spell.description, rightPageX, descYOffset, rightPageW / scale, 'left', 0, scale, scale)
+                love.graphics.setColor(0.3, 0.2, 0.1, 1) 
+                love.graphics.setFont(getNativeFont(10))
+                local descYOffset = yOffset + (70 * layoutScale)
+                love.graphics.printf(spell.description, rightPageX, descYOffset, rightPageW, 'left')
             end
             
-            -- Footer: Navigation text on left page
-            love.graphics.setFont(gFonts['small'])
+            -- Footer
+            love.graphics.setFont(getNativeFont(10))
             love.graphics.setColor(0.4, 0.3, 0.2, 1)
-            love.graphics.printf("A/D to flip pages", bookX * 1.2, bookY + bookH * 0.66, (bookW/2) / scale, 'center', 0, scale, scale)
+            love.graphics.printf("A/D to flip pages", bookX + marginX, bookY + bookH - marginY - (35 * layoutScale), pageWidth, 'center')
         end
     end
 
@@ -1405,11 +1354,11 @@ function PlayState:renderUI()
         love.graphics.setLineWidth(1)
         
         -- Title
-        love.graphics.setFont(gFonts['medium'])
+        love.graphics.setFont(getNativeFont(20))
         love.graphics.printf(step.title, overlayX, overlayY + 30, overlayW, 'center')
         
         -- Text
-        love.graphics.setFont(gFonts['small'])
+        love.graphics.setFont(getNativeFont(14))
         love.graphics.setColor(1, 1, 1, 0.9)
         love.graphics.printf(step.text, overlayX + 40, overlayY + 80, overlayW - 80, 'center')
         
