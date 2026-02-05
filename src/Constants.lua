@@ -7,7 +7,7 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
 GAME_VERSION = "0.1.0"
-UPDATE_URL = "http://localhost:8000/version.json" -- CHANGE THIS TO YOUR SERVER URL
+UPDATE_URL = "https://niconachoo.github.io/DunZum/version.json" -- GitHub Pages URL
 
 -- Gameplay Constants
 NUM_LANES = 5

@@ -18,7 +18,7 @@
 
 local UpdateState = BaseState:extend()
 
-function UpdateState:init()
+function UpdateState:new()
     self.statusText = "Initializing Update System..."
     self.progress = 0
     self.currentFile = ""
