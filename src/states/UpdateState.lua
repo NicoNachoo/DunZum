@@ -31,29 +31,34 @@ function UpdateState:new()
     self.nextState = nil
     self.restart = false
     
-    -- Start the downloader thread
-    self.thread = love.thread.newThread("src/downloader_thread.lua")
-    self.thread:start()
-    
-    -- Communication Channels
+    -- Use global thread/channels
     self.commandChannel = love.thread.getChannel('update_commands')
     self.statusChannel = love.thread.getChannel('update_status')
 end
 
 function UpdateState:enter()
-    self.statusText = "Checking for updates..."
-    self.commandChannel:push({
-        command = 'check_update',
-        url = UPDATE_URL,
-        currentVersion = GAME_VERSION
-    })
+    if gUpdateAvailable and gUpdateFiles then
+        self.statusText = "Update Available! Starting Download..."
+        self.commandChannel:push({
+            command = 'download_update',
+            files = gUpdateFiles
+        })
+    else
+        self.statusText = "Checking for updates..."
+        self.commandChannel:push({
+            command = 'check_update',
+            url = UPDATE_URL,
+            currentVersion = GAME_VERSION
+        })
+    end
 end
 
 function UpdateState:update(dt)
-    -- Check for messages from the thread
-    local msg = self.statusChannel:pop()
-    
-    if msg then
+    -- Consume ALL messages to prevent main.lua from grabbing them
+    while true do
+        local msg = self.statusChannel:pop()
+        if not msg then break end
+        
         if msg.type == 'progress' then
             self.statusText = msg.data.phase
             if msg.data.file then
@@ -63,7 +68,11 @@ function UpdateState:update(dt)
             
         elseif msg.type == 'update_available' then
             self.statusText = "Update Found: " .. msg.data.version
-            -- Automatically start download (or prompt user if desired)
+            -- Update global state just in case
+            gUpdateAvailable = true
+            gUpdateFiles = msg.data.files
+            
+            -- Automatically start download
             self.commandChannel:push({
                 command = 'download_update',
                 files = msg.data.files
@@ -73,14 +82,13 @@ function UpdateState:update(dt)
             self.statusText = "Game is up to date!"
             -- Transition to Menu after a brief delay
             self.transitioning = true
-            self.transitionTimer = 1
+            self.transitionTimer = 2
             self.nextState = 'menu'
             
         elseif msg.type == 'error' then
             self.error = msg.data
             self.statusText = "Error: " .. tostring(msg.data)
             
-            -- Retry or Continue to Menu? Let's verify files anyway
             self.transitioning = true
             self.transitionTimer = 3
             self.nextState = 'menu'
@@ -96,7 +104,7 @@ function UpdateState:update(dt)
     end
     
     -- Thread error handling
-    local err = self.thread:getError()
+    local err = gUpdateThread:getError()
     if err then
         self.error = err
     end

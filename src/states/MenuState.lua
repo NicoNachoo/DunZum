@@ -17,6 +17,15 @@ function MenuState:new()
         SaveManager.delete() -- Start fresh
         gStateMachine:change('play') 
     end })
+    
+    -- Update Client Option
+    local updateText = "UPDATE CLIENT"
+    if gUpdateAvailable then
+        updateText = "UPDATE CLIENT (+)"
+    end
+    
+    table.insert(self.menuItems, { text = updateText, action = function() gStateMachine:change('update') end })
+    
     table.insert(self.menuItems, { text = "OPTIONS", action = function() gStateMachine:push('options') end })
     table.insert(self.menuItems, { text = "EXIT", action = function() love.event.quit() end })
     
@@ -96,7 +105,7 @@ function MenuState:renderUI()
     love.graphics.setFont(gFonts['medium'])
     for i, item in ipairs(self.menuItems) do
         local x = 60
-        local y = winH - 180 + (i-1) * 40
+        local y = winH - 200 + (i-1) * 40
         
         if i == self.highlightedIndex then
             love.graphics.setColor(1, 1, 0, 1) -- Highlight

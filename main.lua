@@ -49,11 +49,25 @@ function love.load()
         ['pause'] = function() return PauseState() end,
         ['gameover'] = function() return GameOverState() end
     }
-    gStateMachine:change('update')
+    gStateMachine:change('menu')
 
     -- Initialize input table
     love.keyboard.keysPressed = {}
     love.mouse.keysPressed = {}
+
+    -- Global Update System
+    gUpdateAvailable = false
+    gUpdateFiles = nil
+    gUpdateThread = love.thread.newThread("src/downloader_thread.lua")
+    gUpdateThread:start()
+    
+    -- Start background check
+    local commandChannel = love.thread.getChannel('update_commands')
+    commandChannel:push({
+        command = 'check_update',
+        url = UPDATE_URL,
+        currentVersion = GAME_VERSION
+    })
 end
 
 function love.resize(w, h)
@@ -85,6 +99,19 @@ function love.update(dt)
     
     love.keyboard.keysPressed = {}
     love.mouse.keysPressed = {}
+    
+    -- Poll Update Thread (Background Check)
+    local statusChannel = love.thread.getChannel('update_status')
+    local msg = statusChannel:pop()
+    if msg then
+        if msg.type == 'update_available' then
+            gUpdateAvailable = true
+            gUpdateFiles = msg.data.files
+            print("Update Available: " .. msg.data.version)
+        -- We ignore other messages here (progress, error) as they are handled by UpdateState when active
+        -- or just ignored during background check
+        end
+    end
 end
 
 function love.draw()
