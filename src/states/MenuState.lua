@@ -43,7 +43,7 @@ function MenuState:update(dt)
     -- Mouse Selection
     for i, item in ipairs(self.menuItems) do
         local x = 60 -- Left padding
-        local y = winH - 180 + (i-1) * 40 -- Bottom-ish
+        local y = winH - 200 + (i-1) * 40 -- Bottom-ish
         local textW = font:getWidth(item.text)
         local textH = font:getHeight()
         
