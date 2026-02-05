@@ -1,10 +1,10 @@
 {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "files": [
         {
             "path": "main.lua",
             "url": "https://niconachoo.github.io/DunZum/main.lua",
-            "md5": "4473c9072f97fbf9c8ad02b814244769"
+            "md5": "073bd1b9da028d0ab28ac85ee879a707"
         },
         {
             "path": "src/HeroClasses.lua",
@@ -44,7 +44,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "590c1b67d5db95a5c6060ab601cdba66"
+            "md5": "2c028596f4902156001a6890192a0766"
         },
         {
             "path": "src/Demon.lua",
@@ -84,7 +84,7 @@
         {
             "path": "src/states/PlayState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PlayState.lua",
-            "md5": "c23eb77f327e116272cb9ebeac148060"
+            "md5": "e0b1709b2d47a200084f8655963513ba"
         },
         {
             "path": "src/states/MenuState.lua",
