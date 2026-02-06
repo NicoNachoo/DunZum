@@ -135,6 +135,11 @@ function MenuState:renderUI()
 
     
     love.graphics.setColor(1, 1, 1, 1)
+    
+    -- Version (Bottom Right)
+    love.graphics.setFont(gFonts['small'])
+    love.graphics.setColor(1, 1, 1, 0.5)
+    love.graphics.printf("v" .. GAME_VERSION, 0, winH - 20, winW - 10, 'right')
 end
 
 return MenuState

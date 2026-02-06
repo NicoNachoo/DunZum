@@ -208,7 +208,7 @@ function UpdateState:renderUI()
     
     love.graphics.setFont(gFonts['small'])
     love.graphics.setColor(1, 1, 1, 0.5)
-    love.graphics.printf("v" .. GAME_VERSION, 10, height - 20, width, 'left')
+    love.graphics.printf("v" .. GAME_VERSION, 0, height - 20, width - 10, 'right')
 end
 
 return UpdateState
