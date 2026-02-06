@@ -8,7 +8,7 @@ REPO_URL = "https://niconachoo.github.io/DunZum/"
 ROOT_DIR = "."
 CONSTANTS_FILE = os.path.join(ROOT_DIR, "src", "Constants.lua")
 OUTPUT_FILE = os.path.join(ROOT_DIR, "version.json")
-FILES_TO_INCLUDE = ["main.lua", "src"] # File or Directory paths relative to ROOT_DIR
+FILES_TO_INCLUDE = ["main.lua", "src", "music", "imgs", "lib"] # File or Directory paths relative to ROOT_DIR
 
 def get_game_version():
     """Extracts GAME_VERSION from src/Constants.lua"""
