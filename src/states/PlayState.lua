@@ -604,7 +604,7 @@ function PlayState:update(dt)
                 if bestTarget then
                     unitA.state = 'ATTACK'
                     unitA.target = bestTarget
-                elseif unitA.state == 'ATTACK' and (not unitA.target or unitA.target.dead) then
+                elseif unitA.state == 'ATTACK' and (not unitA.target or unitA.target.dead or unitA.target.type == unitA.type) then
                     unitA.state = 'WALK'
                     unitA.target = nil
                 end
@@ -638,8 +638,8 @@ function PlayState:update(dt)
                 if bestTarget then
                     unitA.state = 'ATTACK'
                     unitA.target = bestTarget
-                elseif unitA.state == 'ATTACK' and (not unitA.target or unitA.target.dead) then
-                     -- If we were attacking but target is gone/dead, resume walking
+                elseif unitA.state == 'ATTACK' and (not unitA.target or unitA.target.dead or unitA.target.type == unitA.type) then
+                     -- If we were attacking but target is gone/dead/friendly, resume walking
                      unitA.state = 'WALK'
                      unitA.target = nil
                 end
@@ -712,7 +712,7 @@ function PlayState:update(dt)
                  if bestTarget then
                     unitA.state = 'ATTACK'
                     unitA.target = bestTarget
-                 elseif unitA.state == 'ATTACK' and (not unitA.target or unitA.target.dead) then
+                 elseif unitA.state == 'ATTACK' and (not unitA.target or unitA.target.dead or unitA.target.type == unitA.type) then
                      unitA.state = 'WALK'
                      unitA.target = nil
                  end
