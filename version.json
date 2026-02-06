@@ -1,5 +1,5 @@
 {
-    "version": "0.1.9",
+    "version": "0.1.10",
     "files": [
         {
             "path": "main.lua",
@@ -9,7 +9,7 @@
         {
             "path": "src/HeroClasses.lua",
             "url": "https://niconachoo.github.io/DunZum/src/HeroClasses.lua",
-            "md5": "dafcd44d2d5193ff2865863991cdad8d"
+            "md5": "fd1d7fd96b6f07f10a3b87a48cc85ad3"
         },
         {
             "path": "src/InputManager.lua",
@@ -44,7 +44,7 @@
         {
             "path": "src/Grimoire.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Grimoire.lua",
-            "md5": "ff5ad5db5d59a262bddc6ec07b0a8eb5"
+            "md5": "72f7467443f1544b66ac1109abfb5a11"
         },
         {
             "path": "src/FloatingNumber.lua",
@@ -59,17 +59,17 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "0fb7c781ac448183a85a480a404fde08"
+            "md5": "163d27ec762ea350c4bb77e789b617a3"
         },
         {
             "path": "src/Demon.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Demon.lua",
-            "md5": "2fc1db3ae3c6f16166c66d97aca74ab1"
+            "md5": "f08de14bf278d70b0b2e9f3083a41831"
         },
         {
             "path": "src/ParticleManager.lua",
             "url": "https://niconachoo.github.io/DunZum/src/ParticleManager.lua",
-            "md5": "9a88d0eb3a1b75f82e47971ae08b6808"
+            "md5": "322f78e5311e0fa4dbf537d748eb2c39"
         },
         {
             "path": "src/Hero.lua",
@@ -99,7 +99,7 @@
         {
             "path": "src/states/PlayState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PlayState.lua",
-            "md5": "3fc4b7ea838192c9247b80d6964a1b62"
+            "md5": "ea54cf047a593eb1b7c9c11a608c42cc"
         },
         {
             "path": "src/states/MenuState.lua",
@@ -145,6 +145,11 @@
             "path": "imgs/menu.png",
             "url": "https://niconachoo.github.io/DunZum/imgs/menu.png",
             "md5": "474991679a01bc5c7e9ceebf81c50fcb"
+        },
+        {
+            "path": "imgs/hearts.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/hearts.png",
+            "md5": "60d1b480ec58d208b4ec9dd7c578da1c"
         },
         {
             "path": "imgs/mana-bar.png",
