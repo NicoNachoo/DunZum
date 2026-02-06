@@ -1,5 +1,5 @@
 {
-    "version": "0.1.7",
+    "version": "0.1.8",
     "files": [
         {
             "path": "main.lua",
@@ -59,7 +59,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "339fdc94a67c16607cb6c174711701a0"
+            "md5": "5c412dcd1f01b6415c296445a16bbfad"
         },
         {
             "path": "src/Demon.lua",
@@ -130,6 +130,56 @@
             "path": "src/states/BaseState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/BaseState.lua",
             "md5": "ce256f7e6d50cc3c95e95e55e7b732b8"
+        },
+        {
+            "path": "music/Breakout_01.mp3",
+            "url": "https://niconachoo.github.io/DunZum/music/Breakout_01.mp3",
+            "md5": "b45c576d6a17ad541bb4a50e20aff7f5"
+        },
+        {
+            "path": "imgs/background.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/background.png",
+            "md5": "7c14b3502cbf468e844b03637639750d"
+        },
+        {
+            "path": "imgs/menu.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/menu.png",
+            "md5": "474991679a01bc5c7e9ceebf81c50fcb"
+        },
+        {
+            "path": "imgs/mana-bar.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/mana-bar.png",
+            "md5": "4c5c489a2bcafe479e9eed29e3ea4058"
+        },
+        {
+            "path": "imgs/imp.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/imp.png",
+            "md5": "c1a2b88220b8a32a90877082d010df29"
+        },
+        {
+            "path": "imgs/pentagram-upgrade.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/pentagram-upgrade.png",
+            "md5": "c4d61e4ff6d1c21fd33a07596b669b78"
+        },
+        {
+            "path": "imgs/book.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/book.png",
+            "md5": "1319bcaf014ffda6514e68a62340556f"
+        },
+        {
+            "path": "imgs/scroll-upgrade.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/scroll-upgrade.png",
+            "md5": "35d79fd62279705292fd5e41d3c17f4c"
+        },
+        {
+            "path": "lib/json.lua",
+            "url": "https://niconachoo.github.io/DunZum/lib/json.lua",
+            "md5": "a54e3ac08bb73cd1d4443428736752b6"
+        },
+        {
+            "path": "lib/classic.lua",
+            "url": "https://niconachoo.github.io/DunZum/lib/classic.lua",
+            "md5": "cd094a12bf461bef92d83778d25e0924"
         }
     ]
 }
