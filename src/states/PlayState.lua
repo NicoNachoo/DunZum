@@ -422,15 +422,15 @@ function PlayState:update(dt)
                  local wx = math.sin(noiseTime * 5) * wander
                  local wy = math.cos(noiseTime * 3) * wander
                  
-                 local seekSpeed = 7000 
-                 if dist < 100 then seekSpeed = 8000 end -- Hard pull when close
+                 local seekSpeed = 7000 + (p.timer * 10000) -- Accelerate over time
+                 if dist < 100 then seekSpeed = seekSpeed + 5000 end -- Hard pull when close
                  
                  p.vx = p.vx + (nx * seekSpeed + wx) * dt
                  p.vy = p.vy + (ny * seekSpeed + wy) * dt
                  
-                 -- Heavy damping to prevent orbiting
-                 p.vx = p.vx * 0.90
-                 p.vy = p.vy * 0.90
+                 -- Heavy damping to prevent orbiting, but less aggressive than before
+                 p.vx = p.vx * 0.92
+                 p.vy = p.vy * 0.92
              end
         end
         
