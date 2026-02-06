@@ -34,7 +34,7 @@ local HeroClasses = {
     },
     ['ASSASSIN'] = {
         name = 'Assassin',
-        hpMult = 0.6, -- 60 (Glass Cannon)
+        hpMult = 0.4, -- 40 (Glass Cannon)
         speed = 30,
         damage = 25,
         range = 10,

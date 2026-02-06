@@ -7,13 +7,18 @@ for i = 0, 3 do
     table.insert(Demon.impQuads, love.graphics.newQuad(i * frameSize, 128, frameSize, frameSize, Demon.impSprite:getDimensions()))
 end
 
-function Demon:new(x, y, width, height, color, speed, attackRange, originalCost, playState)
+function Demon:new(x, y, width, height, color, speed, attackRange, originalCost, playState, demonType)
     Demon.super.new(self, x, y, width, height, color)
     self.originalCost = originalCost or 0
     self.speed = speed or 20
     self.type = 'demon'
+    self.demonType = demonType -- Set early
     
     local hpBase = 50
+    if demonType == 'IMP' then
+        hpBase = 30 -- Reduced HP for Imp
+    end
+    
     local damageBase = 15
     
     if playState then
@@ -33,10 +38,14 @@ function Demon:new(x, y, width, height, color, speed, attackRange, originalCost,
     self.particleTimer = 0
     self.attackCooldownTimer = 0
     
-    -- Animation state for Imp
     self.animationTimer = 0
     self.animationFrame = 1
     self.animationSpeed = 0.15
+    
+    -- Voidwalker Shield State
+    self.maxShield = 50 
+    self.currentShield = self.maxShield
+    self.isEnraged = false
 end
 
 function Demon:update(dt, playState)
@@ -99,6 +108,17 @@ function Demon:update(dt, playState)
             -- Don't reset cooldown here, it persists
         end
     end
+    
+    -- Rage Particles
+    if self.demonType == 'VOIDWALKER' and self.isEnraged then
+        if gParticleManager then
+            if math.random() < (60 * dt) then -- Increased spawn rate for dense effect
+                 local rx = self.x + math.random(0, self.width)
+                 local ry = self.y + math.random(0, self.height)
+                 gParticleManager:spawnRageParticles(rx, ry)
+            end
+        end
+    end
 end
 
 function Demon:fireProjectile(playState)
@@ -124,10 +144,28 @@ end
 
 function Demon:takeDamage(amount, playState, attacker)
     if self.demonType == 'VOIDWALKER' then
-        local reduction = playState and playState.voidwalkerArmor or 0.5
-        local finalDamage = amount * reduction
-        -- Voidwalker takes reduced damage
-        Demon.super.takeDamage(self, finalDamage, playState, attacker, {0.5, 0.5, 1, 1}) -- Blueish numbers for reduction
+        if self.currentShield > 0 then
+            -- Shield takes damage
+            self.currentShield = self.currentShield - amount
+            
+            -- Check for Rage Trigger
+            if self.currentShield <= 0 then
+                self.currentShield = 0
+                self.isEnraged = true
+                self.damage = self.damage * 1.5 -- Rage Damage Buff
+                self.attackRate = self.attackRate * 0.5 -- Rage Attack Speed Buff (Lower is faster)
+                
+                if gParticleManager then
+                    gParticleManager:spawnPoof(self.x + self.width/2, self.y + self.height/2) -- Rage explosion?
+                end
+            end
+            
+            -- Floating Text for Shield Damage (Blue)
+             table.insert(playState.floatingNumbers, FloatingNumber(self.x, self.y, "-" .. math.ceil(amount), {0.2, 0.5, 1, 1}))
+        else
+            -- No shield, take health damage
+            Demon.super.takeDamage(self, amount, playState, attacker)
+        end
     elseif self.demonType == 'SUCCUBUS' then
         -- Succubus disappearance and enchantment logic
         if attacker and attacker.type == 'hero' and attacker.enchant then
@@ -146,12 +184,14 @@ end
 function Demon:render()
     -- Draw Shield for Voidwalker
     if self.demonType == 'VOIDWALKER' and not self.dead then
-        love.graphics.setColor(0.2, 0.2, 1, 0.3)
-        love.graphics.circle('fill', self.x + self.width/2, self.y + self.height/2, self.width/2 + 4)
-        love.graphics.setColor(0.4, 0.4, 1, 0.6)
-        love.graphics.setLineWidth(2)
-        love.graphics.circle('line', self.x + self.width/2, self.y + self.height/2, self.width/2 + 4)
-        love.graphics.setLineWidth(1)
+        if self.currentShield > 0 then
+            love.graphics.setColor(0.2, 0.2, 1, 0.3 + (self.currentShield/self.maxShield) * 0.3)
+            love.graphics.circle('fill', self.x + self.width/2, self.y + self.height/2, self.width/2 + 6)
+            love.graphics.setColor(0.4, 0.4, 1, 0.8)
+            love.graphics.setLineWidth(2)
+            love.graphics.circle('line', self.x + self.width/2, self.y + self.height/2, self.width/2 + 6)
+            love.graphics.setLineWidth(1)
+        end
     end
 
     if self.demonType == 'IMP' and not self.dead then

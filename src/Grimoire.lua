@@ -7,7 +7,7 @@ local Grimoire = {
         height = 24, 
         speed = 20, 
         type = 'summon', 
-        attackRange = 200,
+        attackRange = 120,
         description = "A swift ranged demon that hurls fireballs from afar. Imps are cheap and fast, making them ideal for overwhelming enemies with numbers. Their long range allows them to strike before heroes can retaliate."
     },
     ['VOIDWALKER'] = { 

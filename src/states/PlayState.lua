@@ -27,6 +27,13 @@ function PlayState:enter(params)
             elseif uData.type == 'demon' then
                 unit = Demon(uData.x, uData.y, uData.width, uData.height, uData.color, uData.speed, uData.attackRange, uData.originalCost)
                 unit.demonType = uData.demonType
+                unit.currentShield = uData.currentShield
+                unit.isEnraged = uData.isEnraged
+                
+                if unit.isEnraged then
+                    unit.damage = unit.damage * 1.5
+                    unit.attackRate = unit.attackRate * 0.5
+                end
             else
                 unit = Hero(uData.x, uData.y, uData.width, uData.height, uData.classType, uData.level)
             end
@@ -184,6 +191,8 @@ function PlayState:serializeState()
             uData.speed = u.speed
             uData.attackRange = u.attackRange
             uData.demonType = u.demonType
+            uData.currentShield = u.currentShield
+            uData.isEnraged = u.isEnraged
         end
         table.insert(units, uData)
     end
@@ -933,9 +942,9 @@ function PlayState:summon(spell)
     -- Calculate Y based on lane center
     local y = LANE_OFFSET + (self.highlightedLane - 1) * LANE_HEIGHT + (LANE_HEIGHT - spell.height) / 2
     
-    local demon = Demon(x, y, spell.width, spell.height, spell.color, spell.speed, spell.attackRange, spell.cost, self)
+    local demon = Demon(x, y, spell.width, spell.height, spell.color, spell.speed, spell.attackRange, spell.cost, self, self.inputBuffer)
     demon.lane = self.highlightedLane
-    demon.demonType = self.inputBuffer -- Store type for special logic
+    -- demon.demonType already set in new()
     
     gParticleManager:spawnPoof(x + spell.width/2, y + spell.height/2)
     table.insert(self.activeUnits, demon)

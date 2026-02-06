@@ -108,6 +108,26 @@ function ParticleManager:spawnCancelEffect(x, y)
     table.insert(self.systems, { ps = ps, x = x, y = y })
 end
 
+function ParticleManager:spawnRageParticles(x, y)
+    local ps = love.graphics.newParticleSystem(self.texture, 8)
+    ps:setParticleLifetime(0.5, 1.2)
+    -- Float upwards
+    ps:setLinearAcceleration(-5, -50, 5, -100)
+    ps:setSpeed(10, 20)
+    ps:setDirection(-math.pi / 2) -- Up
+    ps:setSpread(0.5)
+    -- Red squares fading out
+    ps:setColors(1, 0, 0, 0.8, 0.5, 0, 0, 0)
+    ps:setSizeVariation(0.5)
+    ps:setSizes(2, 1) -- Start larger, shrink
+    
+    ps:emit(1) 
+    
+    table.insert(self.systems, { ps = ps, x = x, y = y })
+end
+
+
+
 function ParticleManager:update(dt)
     for i = #self.systems, 1, -1 do
         local system = self.systems[i]
