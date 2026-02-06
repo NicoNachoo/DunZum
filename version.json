@@ -1,5 +1,5 @@
 {
-    "version": "0.1.8",
+    "version": "0.1.9",
     "files": [
         {
             "path": "main.lua",
@@ -59,7 +59,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "5c412dcd1f01b6415c296445a16bbfad"
+            "md5": "0fb7c781ac448183a85a480a404fde08"
         },
         {
             "path": "src/Demon.lua",
@@ -99,7 +99,7 @@
         {
             "path": "src/states/PlayState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PlayState.lua",
-            "md5": "0e3036519ab01d58d643257b15a4fc92"
+            "md5": "3fc4b7ea838192c9247b80d6964a1b62"
         },
         {
             "path": "src/states/MenuState.lua",
