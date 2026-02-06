@@ -220,6 +220,24 @@ function PlayState:save()
 end
 
 function PlayState:update(dt)
+    -- Tutorial Input Blocking
+    if self.showTutorial then
+        -- Next Step (Right, Confirm, Click)
+        if InputManager:wasPressed('right') or InputManager:wasPressed('confirm') or love.mouse.wasPressed(1) then
+            self.tutorialStep = self.tutorialStep + 1
+            if self.tutorialStep > #self.tutorialSteps then
+                self.showTutorial = false
+                self.tutorialSeen = true
+                -- Optionally save here or rely on next save
+            end
+        -- Previous Step (Left)
+        elseif InputManager:wasPressed('left') then
+            self.tutorialStep = math.max(1, self.tutorialStep - 1)
+        end
+        
+        return -- Block all other updates
+    end
+
     -- Update Mana Animation Intensity
     local targetIntensity = self.isChanneling and 1 or 0
     -- Lerp towards target (Speed 10 = faster stop)
