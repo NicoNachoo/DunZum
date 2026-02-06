@@ -38,4 +38,5 @@ Grimoire = require 'src/Grimoire'
 ParticleManager = require 'src/ParticleManager'
 SaveManager = require 'src/SaveManager'
 FloatingNumber = require 'src/FloatingNumber'
+HUD = require 'src/HUD'
 

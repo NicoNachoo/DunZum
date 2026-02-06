@@ -66,42 +66,21 @@ function PlayState:enter(params)
     self.castleSignal = false 
     self.castleSignalTimer = 0
     
-    -- Heart UI
-    self.heartsImage = love.graphics.newImage('imgs/hearts.png')
-    local hw = self.heartsImage:getWidth()
-    local hh = self.heartsImage:getHeight()
-    self.heartFullQuad = love.graphics.newQuad(0, 0, hw/2, hh, hw, hh)
-    self.heartEmptyQuad = love.graphics.newQuad(hw/2, 0, hw/2, hh, hw, hh)
-    
-    self.highlightedLane = 1
-    self.floatingNumbers = {}
-    
     -- Currency
     self.souls = data and data.souls or 0
-    
+
     -- Particles
     gParticleManager = ParticleManager()
-    
+
+    self.floatingNumbers = {}
+
     -- Screen Shake
     self.shakeDuration = 0
     self.shakeMagnitude = 0
     
-    -- UI State
-    self.showGrimoire = false
-    self.grimoireY = love.graphics.getHeight()
-    self.bookImage = love.graphics.newImage('imgs/book.png')
-    self.upgradeIcon = love.graphics.newImage('imgs/pentagram-upgrade.png')
-    self.grimoireTargetY = love.graphics.getHeight()
-    
-    self.manaAnimIntensity = 0 -- For smooth animation ease-out
-    
-    self.grimoirePage = 1
-    self.grimoireSpells = {'IMP', 'VOIDWALKER', 'SUCCUBUS', 'MEDITATE', 'MANA', 'REGEN', 'HEAL', 'UPGRADES_LOG'}
-    self.grimoireAnimTimer = 0
-    self.grimoireFloatTimer = 0
-    self.grimoireAnimFrame = 1
-    self.boonScrollOffset = 0 -- Scroll position for boons page
-    
+    -- HUD
+    self.hud = HUD(self)
+
     -- Selected Upgrades Tracking
     self.selectedUpgrades = data and data.selectedUpgrades or {}
     
@@ -114,41 +93,25 @@ function PlayState:enter(params)
     self.manaRefundRate = data and data.manaRefundRate or 0.5
     self.manaCostReduction = data and data.manaCostReduction or 0
     self.impRangeBonus = data and data.impRangeBonus or 0
-    self.voidwalkerArmor = data and data.voidwalkerArmor or 0.5 -- Damage taken multiplier
+    self.voidwalkerArmor = data and data.voidwalkerArmor or 0.5 
     
-    -- Purchase Tracking for Progressive Costs
+    -- Purchase Tracking
     self.upgradeCounts = data and data.upgradeCounts or {}
     
-    -- Mouse tracking for selection conflict fix
+    -- Mouse tracking
     self.lastMouseX = 0
     self.lastMouseY = 0
     
-    -- Vignette Shader for Meditation
-    self.vignetteShader = love.graphics.newShader[[
-        extern vec2 screenDims;
-        extern float time;
-        vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-            vec2 uv = screen_coords / screenDims;
-            vec2 center = vec2(0.5, 0.5);
-            float d = distance(uv, center);
-            
-            // Fluctuate the edge slightly based on time
-            float edge = 0.3 + (sin(time * 2.0) * 0.05);
-            float vignette = smoothstep(edge, 1.2, d); 
-            
-            // Fluctuate alpha (intensity) - less aggressive (max 0.4)
-            float alpha = 0.3 + (sin(time * 3.0) * 0.1);
-            
-            return vec4(0.4, 0.8, 1.0, vignette * alpha);
-        }
-    ]]
+    -- Particles (still needed if logic references them? or move references to HUD?)
+    -- Logic in update() references self.meditateParticles. 
+    -- We will move that logic to HUD, but for now let's not crash if we haven't deleted the update logic yet.
+    -- Actually, we plan to delete the update logic next. 
+    -- But PlayState still adds to them? 
+    -- e.g. self.meditateParticles is added to when channeling.
+    -- We should change PlayState to add to self.hud.meditateParticles?
+    -- Yes. So we don't need self.meditateParticles here if we fix the references.
     
-    self.meditateParticles = {} -- Particles for meditation effect
-    self.manaAbsorptionParticles = {} -- Particles for mana absorption effect
-    
-    self.manaBarImage = love.graphics.newImage('imgs/mana-bar.png')
-    
-    -- Tutorial State
+    -- Tutorial State (Logic only)
     self.tutorialSeen = data and data.tutorialSeen or false
     self.showTutorial = not self.tutorialSeen
     self.tutorialStep = 1
@@ -255,15 +218,13 @@ function PlayState:update(dt)
         return -- Block all other updates
     end
 
-    -- Update Mana Animation Intensity
-    local targetIntensity = self.isChanneling and 1 or 0
-    -- Lerp towards target (Speed 10 = faster stop)
-    self.manaAnimIntensity = self.manaAnimIntensity + (targetIntensity - self.manaAnimIntensity) * dt * 10
-    
+    -- Update HUD
+    self.hud:update(dt)
+
     -- Global Input (Pause)
     if InputManager:wasPressed('back') then
-        if self.showGrimoire then
-            self.showGrimoire = false
+        if self.hud.showGrimoire then
+            self.hud.showGrimoire = false
         elseif self.isTyping then
             self.isTyping = false
             self.inputBuffer = ""
@@ -274,68 +235,47 @@ function PlayState:update(dt)
     
     -- Grimoire Toggle (Tab)
     if love.keyboard.wasPressed('tab') then
-        self.showGrimoire = not self.showGrimoire
-        if self.showGrimoire then
-            self.grimoirePage = 1 -- Reset to first page
+        self.hud.showGrimoire = not self.hud.showGrimoire
+        if self.hud.showGrimoire then
+            self.hud.grimoirePage = 1 -- Reset to first page
         end
         self:breakChanneling()
     end
 
     -- Grimoire Navigation
-    if self.showGrimoire then
+    if self.hud.showGrimoire then
         if InputManager:wasPressed('left') then
-            self.grimoirePage = math.max(1, self.grimoirePage - 1)
-            self.boonScrollOffset = 0
+            self.hud.grimoirePage = math.max(1, self.hud.grimoirePage - 1)
+            self.hud.boonScrollOffset = 0
         elseif InputManager:wasPressed('right') then
-            self.grimoirePage = math.min(#self.grimoireSpells, self.grimoirePage + 1)
-            self.boonScrollOffset = 0
+            self.hud.grimoirePage = math.min(#self.hud.grimoireSpells, self.hud.grimoirePage + 1)
+            self.hud.boonScrollOffset = 0
         end
         
         -- Scroll on boons page
-        local spellKey = self.grimoireSpells[self.grimoirePage]
+        local spellKey = self.hud.grimoireSpells[self.hud.grimoirePage]
         if spellKey == 'UPGRADES_LOG' then
             local numBoons = #self.selectedUpgrades
-            local maxVisibleBoons = 5
-            local maxScroll = math.max(0, numBoons - maxVisibleBoons)
+            local maxScroll = math.max(0, numBoons - 5)
             
             if InputManager:wasPressed('up') then
-                self.boonScrollOffset = math.max(0, self.boonScrollOffset - 1)
+                self.hud.boonScrollOffset = math.max(0, self.hud.boonScrollOffset - 1)
             elseif InputManager:wasPressed('down') then
-                self.boonScrollOffset = math.min(maxScroll, self.boonScrollOffset + 1)
+                self.hud.boonScrollOffset = math.min(maxScroll, self.hud.boonScrollOffset + 1)
             end
         end
-        
-        -- While Grimoire is open, block other updates? 
-        -- Original code returned here if showGrimoire was true inside update...
-        -- Wait, update() handles animations even when grimoire is opening. 
-        -- But logic paused.
     end
     
-    -- Toggle Grimoire handled in keypressed
-    
-    -- Update Grimoire Animation
-    local winH = love.graphics.getHeight()
-    local bookScale = 1.1 -- Must match renderUI
-    local bookH = winH * bookScale
-    
-    if self.showGrimoire then
-        self.grimoireTargetY = (winH - bookH) / 2 -- Centered vertically
-    else
-        self.grimoireTargetY = winH + 10 -- Off-screen
-    end
-    
-    -- Smooth slide (Lerp-like)
-    self.grimoireY = self.grimoireY + (self.grimoireTargetY - self.grimoireY) * 10 * dt
-
-    if self.showGrimoire and math.abs(self.grimoireY - self.grimoireTargetY) < 1 then
-        -- Update Grimoire Animation
-        self.grimoireAnimTimer = self.grimoireAnimTimer + dt
-        self.grimoireFloatTimer = self.grimoireFloatTimer + dt
-        if self.grimoireAnimTimer >= 0.15 then
-            self.grimoireAnimTimer = 0
-            self.grimoireAnimFrame = (self.grimoireAnimFrame % 4) + 1
-        end
-        return -- Pause game logic while open
+    -- Check if Grimoire is fully open (Animation handled in HUD)
+    -- Logic: If Grimoire is opening/open, we might want to pause game logic?
+    -- Original code paused if animation was running or open.
+    -- We can check self.hud.showGrimoire.
+    -- But we want the slide to finish?
+    -- HUD handles the slide.
+    -- Let's just return if showGrimoire is strictly true for now, 
+    -- as precise animation timing check is complex across classes without a getter.
+    if self.hud.showGrimoire then
+        return
     end
     
     -- Tutorial Logic
@@ -354,107 +294,7 @@ function PlayState:update(dt)
     -- Update Particles
     gParticleManager:update(dt)
     
-    -- Meditation Particles
-    if self.isChanneling then
-        -- Spawn random particles
-        local winW, winH = love.graphics.getWidth(), love.graphics.getHeight()
-        if math.random() < (10 * dt) then -- density
-            table.insert(self.meditateParticles, {
-                x = math.random(0, winW),
-                y = winH + 10,
-                vx = (math.random() - 0.5) * 50, -- slight drift
-                vy = -math.random(50, 150), -- rising
-                life = math.random(1, 3),
-                maxLife = 3,
-                size = math.random(2, 5)
-            })
-        end
-    end
-    
-    -- Update Meditation Particles
-    for i = #self.meditateParticles, 1, -1 do
-        local p = self.meditateParticles[i]
-        p.life = p.life - dt
-        p.x = p.x + p.vx * dt
-        p.y = p.y + p.vy * dt
-        
-        if p.life <= 0 or p.y < -10 then
-            table.remove(self.meditateParticles, i)
-        end
-    end
-    
-    -- Update Mana Absorption Particles
-    -- Calculate dynamic target position (same logic as renderUI)
-    local winW = love.graphics.getWidth()
-    local time = love.timer.getTime()
-    local resolutionScale = winW / 1280
-    
-    local baseImgX, baseImgY = 20, 20
-    local floatOffset = math.sin(time * 1.5) * 5
-    local swayOffset = (love.math.noise(time * 0.5) - 0.5) * 20
-    
-    local imgX = math.floor(baseImgX + swayOffset)
-    local imgY = math.floor(baseImgY + floatOffset)
-    
-    -- Target center of the bar
-    local barX = math.floor(imgX + (200 * resolutionScale))
-    local barY = math.floor(imgY + (65 * resolutionScale))
-    local barW = math.floor(math.max(1, 190 * resolutionScale))
-    local barH = math.floor(math.max(1, 20 * resolutionScale))
-    
-    local targetX = barX + barW / 2
-    local targetY = barY + barH / 2 
-    for i = #self.manaAbsorptionParticles, 1, -1 do
-        local p = self.manaAbsorptionParticles[i]
-        p.timer = p.timer + dt
-        
-        -- Physics
-        p.x = p.x + p.vx * dt
-        p.y = p.y + p.vy * dt
-        
-        if p.state == 'explode' then
-             -- Initial burst phase
-             p.vx = p.vx * 0.9 -- Slow down
-             p.vy = p.vy * 0.9
-             
-             if p.timer > 0.15 then
-                 p.state = 'seek'
-             end
-        elseif p.state == 'seek' then
-             -- Seek logic
-             local dx = targetX - p.x
-             local dy = targetY - p.y
-             local dist = math.sqrt(dx*dx + dy*dy)
-            
-             if dist < 20 then
-                 -- Reached target!
-                 self.mana = math.min(self.mana + (p.value or 0), self.maxMana) -- Delayed refund
-                 table.remove(self.manaAbsorptionParticles, i)
-             else
-                 local nx, ny = dx/dist, dy/dist
-                 
-                 -- Nonlinear steering
-                 local wander = 500
-                 local noiseTime = love.timer.getTime() + p.noiseOffset
-                 local wx = math.sin(noiseTime * 5) * wander
-                 local wy = math.cos(noiseTime * 3) * wander
-                 
-                 local seekSpeed = 7000 + (p.timer * 10000) -- Accelerate over time
-                 if dist < 100 then seekSpeed = seekSpeed + 5000 end -- Hard pull when close
-                 
-                 p.vx = p.vx + (nx * seekSpeed + wx) * dt
-                 p.vy = p.vy + (ny * seekSpeed + wy) * dt
-                 
-                 -- Heavy damping to prevent orbiting, but less aggressive than before
-                 p.vx = p.vx * 0.92
-                 p.vy = p.vy * 0.92
-             end
-        end
-        
-        if p.timer > 8.0 then -- Long failsafe removal
-            table.remove(self.manaAbsorptionParticles, i)
-        end
-    end
+    -- Meditation Particles (Moved to HUD)
     
     -- Update Shake
     if self.shakeDuration > 0 then
@@ -806,7 +646,7 @@ function PlayState:update(dt)
             local refundPerParticle = totalRefund / numParticles
             
             for k = 1, numParticles do
-                table.insert(self.manaAbsorptionParticles, {
+                table.insert(self.hud.manaAbsorptionParticles, {
                     x = startX,
                     y = startY,
                     vx = (math.random() - 0.5) * 1500, -- Much wider explosion
@@ -1037,481 +877,8 @@ function PlayState:render()
 end
 
 function PlayState:renderUI()
-    local winW = love.graphics.getWidth()
-    local winH = love.graphics.getHeight()
-
-
-
-    -- UI: Mana Bar (Centered inside mana-bar.png)
-    local baseImgX, baseImgY = 20, 20 -- Reverted to original position
-    
-    -- Animation: Floating (Sine) + Random Sway (Noise)
-    local time = love.timer.getTime()
-    
-    -- Calculate raw offsets
-    local rawFloat = math.sin(time * 1.5) * 5 -- Vertical floating
-    local rawSway = (love.math.noise(time * 0.5) - 0.5) * 20 -- Slow random horizontal sway
-    
-    -- Apply smoothed intensity
-    local floatOffset = rawFloat * self.manaAnimIntensity
-    local swayOffset = rawSway * self.manaAnimIntensity
-    
-    local imgX = math.floor(baseImgX + swayOffset)
-    local imgY = math.floor(baseImgY + floatOffset)
-
-    local imgW = self.manaBarImage:getWidth()
-    local imgH = self.manaBarImage:getHeight()
-    
-    -- Calculate Scale to be 20% of screen width (User change)
-    local targetWidth = winW * 0.25
-    local scale = targetWidth / imgW
-    
-    -- Resolution Scale for manual offsets (Base: 1280x720)
-    local resolutionScale = winW / 1280
-    
-    -- UI: Hearts (Centered ON TOP of Mana Bar in Z-axis)
-    -- Calculate dimensions
-    local heartSize = 64 * resolutionScale -- Smaller hearts for mana bar area
-    local heartSpacing = 5 * resolutionScale
-    
-    local hw = self.heartsImage:getWidth() / 2
-    local hh = self.heartsImage:getHeight()
-    local hScale = heartSize / hh
-    
-    -- Calculate positioning
-    local totalHeartW = (self.maxCastleHealth * heartSize) + ((self.maxCastleHealth - 1) * heartSpacing)
-    local manaBarCenterX = imgX + (imgW * scale) / 2
-    local heartsStartX = (winW / 2) - (totalHeartW / 2) -- Center on screen
-    -- Center vertically on the bar
-    local heartsY = imgY + (imgH * scale) / 2 - (heartSize / 2)
-    
-    love.graphics.setColor(1, 1, 1, 1)
-    
-    local curHeartX = heartsStartX
-    for i = 1, self.maxCastleHealth do
-        local quad = self.heartEmptyQuad
-        if i <= self.castleHealth then
-            quad = self.heartFullQuad
-        end
-        
-        love.graphics.draw(self.heartsImage, quad, curHeartX, heartsY, 0, hScale, hScale)
-        curHeartX = curHeartX + heartSize + heartSpacing
-    end
-
-    -- 2. Calculate Bar Dimensions (Centered within the image)
-    -- Scaling hardcoded values: 
-    -- 190 -> 190 * resolutionScale
-    -- 20 -> 20 * resolutionScale
-    -- Offset X: 60 (80-20) -> 60 * resolutionScale
-    -- Offset Y: 65 (85-20) -> 65 * resolutionScale
-    
-    local barMaxWidth = math.floor(math.max(1, 190 * resolutionScale))
-    local barHeight = math.floor(math.max(1, 20 * resolutionScale))
-    
-    local barX = math.floor(imgX + (60 * resolutionScale))
-    local barY = math.floor(imgY + (65 * resolutionScale))
-
-    -- 3. Draw Filled Portion (Pixel Art Particles)
-    local fillWidth = (self.mana / self.maxMana) * barMaxWidth
-    local pixelSize = math.max(1, 4 * scale)
-
-    local time = love.timer.getTime()
-    
-    -- Scissor to ensure we don't draw outside the bar area (optional but safe)
-    love.graphics.setScissor(barX, barY, fillWidth, barHeight)
-    
-    -- Iterate through the bar area in grid steps
-    for y = 0, barHeight, pixelSize do
-        for x = 0, barMaxWidth, pixelSize do
-             -- Only draw if within fillWidth
-            if x < fillWidth then
-                -- Generate a pseudo-random pulsating shade of blue
-                local flowSpeed = 2.0
-                local wave = math.sin(time * flowSpeed + x * 0.1) 
-                local noise = love.math.noise(x * 0.05, y * 0.05, time * 0.5)
-                
-                -- Blend: 70% wave, 30% noise
-                local combined = (wave * 0.7) + (noise * 0.3)
-                
-                -- Blue colors
-                local r = 0.1
-                local g = 0.2 + (combined + 1) * 0.1
-                local b = 0.7 + (combined + 1) * 0.15
-                local a = 0.8 + noise * 0.2
-                
-                love.graphics.setColor(r, g, b, a)
-                love.graphics.rectangle('fill', barX + x, barY + y, pixelSize, pixelSize)
-            end
-        end
-    end
-    love.graphics.setScissor() -- Reset scissor
-
-    -- 4. Draw markers every 100 mana
-    love.graphics.setColor(0, 0, 0, 0.5)
-    for i = 100, self.maxMana - 1, 100 do
-        local markerRatio = i / self.maxMana
-        local markerX = barX + markerRatio * barMaxWidth
-        if markerX < barX + barMaxWidth then
-            love.graphics.line(markerX, barY, markerX, barY + barHeight)
-        end
-    end
-    
-    -- 1. Draw the Container/Frame Image first
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.draw(self.manaBarImage, imgX, imgY, 0, scale, scale)
-    
-    -- 5. Mana Text (Centered on bar)
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.setFont(gFonts['medium_small'])
-    
-    local manaText = math.floor(self.mana) .. '/' .. math.floor(self.maxMana)
-    
-    -- Center vertically in the bar (Height 20 unscaled, Font 12 unscaled -> 4 offset)
-    local textY = barY + (4 * resolutionScale)
-    
-    -- Limit is 190 (unscaled bar width), centered
-    love.graphics.printf(manaText, barX, textY, 190, 'center', 0, resolutionScale, resolutionScale)
-
-    -- Draw Mana Absorption Particles (On Top of HUD)
-    love.graphics.setBlendMode('add')
-    for _, p in ipairs(self.manaAbsorptionParticles) do
-        -- Light Blue Glow
-        love.graphics.setColor(0.2, 0.6, 1, 1.0) 
-        local size = 6 -- Squared size
-        love.graphics.rectangle('fill', p.x - size/2, p.y - size/2, size, size) 
-    end
-    love.graphics.setBlendMode('alpha')
-    love.graphics.setColor(1, 1, 1, 1)
-    
-    -- UI: Castle Health
-    if self.castleSignal then
-        love.graphics.setColor(1, 0, 0, 1)
-    else
-        love.graphics.setColor(1, 1, 1, 1)
-    end
-    -- Resolution Scale for manual offsets (Base: 1280x720)
-    local resolutionScale = winW / 1280
-    local layoutScale = math.max(1, winH / 720)
-
-    -- Helper to pick native font size
-    local function getNativeFont(baseSize)
-        local target = baseSize * layoutScale
-        if target <= 7 then return gFonts['tiny']
-        elseif target <= 10 then return gFonts['small']
-        elseif target <= 14 then return gFonts['medium_small'] -- 12px base (at 720p)
-        elseif target <= 20 then return gFonts['medium']       -- 16px base (at 720p)
-        elseif target <= 28 then return gFonts['xlarge']       -- 24px
-        elseif target <= 40 then return gFonts['large']        -- 32px
-        else return gFonts['huge'] end                         -- 48px
-    end
-
-    -- UI: Castle Health
-
-    
-    -- UI: Souls
-    love.graphics.setColor(0.8, 0.4, 1, 1) -- Purple
-    love.graphics.printf(self.souls .. " Souls", winW - (220 * layoutScale), 50 * layoutScale, 200 * layoutScale, 'right', 0, 1, 1)
-    
-    -- UI: Wave
-    love.graphics.setColor(1, 1, 0, 1) -- Yellow
-    love.graphics.print('Wave: ' .. self.wave, winW / 2 - (50 * layoutScale), 20 * layoutScale, 0, 1, 1)
-    love.graphics.setColor(1, 1, 1, 1)
-    
-    -- UI: Typing Buffer
-    if self.isTyping then
-        love.graphics.setFont(getNativeFont(16))
-        
-        local bufferW = 400 * layoutScale
-        local bufferH = 60 * layoutScale
-        local bufferX = (winW - bufferW) / 2
-        local bufferY = winH - (100 * layoutScale)
-        
-        -- Draw background for text buffer (Chunky pixel look)
-        love.graphics.setColor(0, 0, 0, 0.8)
-        love.graphics.rectangle('fill', bufferX, bufferY, bufferW, bufferH, 10 * layoutScale)
-        
-        love.graphics.setColor(1, 0.8, 0, 1) -- Gold border
-        love.graphics.setLineWidth(2 * layoutScale)
-        love.graphics.rectangle('line', bufferX, bufferY, bufferW, bufferH, 10 * layoutScale)
-        love.graphics.setLineWidth(1)
-        
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.printf(
-            self.inputBuffer, 
-            bufferX, 
-            bufferY + (15 * layoutScale), 
-            bufferW, 
-            'center'
-        )
-        
-        -- Helper line when typing
-        love.graphics.setFont(getNativeFont(10))
-        love.graphics.setColor(1, 1, 1, 0.6)
-        love.graphics.printf("TYPE UNIT NAME AND ENTER", bufferX, bufferY + bufferH + (5 * layoutScale), bufferW, 'center')
-    else
-        love.graphics.setFont(getNativeFont(10))
-        love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.printf(
-            "W/S: Select Lane | ENTER: Summon | TAB: Grimoire", 
-            0, 
-            winH - (30 * layoutScale), 
-            winW, 
-            'center'
-        )
-        love.graphics.setColor(1, 1, 1, 1)
-    end
-
-    -- UI: Grimoire Overlay (Animated Book)
-
-    if self.grimoireY < winH then
-        local imgW = self.bookImage:getWidth()
-        local imgH = self.bookImage:getHeight()
-        
-        -- Target size based on Screen Height (110% of screen - Massive close-up)
-        local targetH = winH * 1.1
-        local scale = targetH / imgH
-        
-        local bookH = targetH
-        local bookW = imgW * scale
-        
-        local bookX = math.floor((winW - bookW) / 2)
-        -- Add floating animation (Sine wave: Speed 2, Amplitude 10)
-        local floatOffset = math.sin(self.grimoireFloatTimer * 2) * (10 * layoutScale)
-        local bookY = math.floor(self.grimoireY + floatOffset)
-        
-        -- Draw Book Image
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.draw(self.bookImage, bookX, bookY, 0, scale, scale)
-        
-        -- Page Layout Calculations (Relative to book size on screen)
-        local marginX = bookW * 0.22 
-        local marginY = bookH * 0.30 
-        local gutter = bookW * 0.12  
-            
-        local contentX = math.floor(bookX + marginX)
-        local contentY = math.floor(bookY + marginY)
-        
-        -- Dimensions of a single page print area
-        local pageWidth = math.floor((bookW / 2) - marginX - (gutter / 2))
-        
-        -- Right Page Start X
-        local rightPageX = math.floor(bookX + (bookW / 2) + (gutter / 2))
-        
-        -- Page Content
-        local spellKey = self.grimoireSpells[self.grimoirePage]
-        local spell = Grimoire[spellKey]
-        
-        if spellKey == 'UPGRADES_LOG' then
-            -- Left Page Title
-            love.graphics.setColor(0.2, 0.1, 0, 1) 
-            love.graphics.setFont(getNativeFont(16)) -- Base 16px
-            love.graphics.printf("Grimoire\nof Boons", contentX, contentY, pageWidth, 'center')
-            
-            -- Central Illustration (Pentagram Image)
-            local centerX = contentX + pageWidth / 2
-            local centerY = contentY + (160 * layoutScale) 
-            
-            love.graphics.setColor(1, 1, 1, 1)
-            local targetSize = 150 * layoutScale
-            local uScale = targetSize / self.upgradeIcon:getWidth()
-            love.graphics.draw(self.upgradeIcon, centerX, centerY, 0, uScale, uScale, self.upgradeIcon:getWidth()/2, self.upgradeIcon:getHeight()/2)
-            
-            -- Right Page: The List
-            local rightPageW = pageWidth
-            
-            love.graphics.setColor(0.2, 0.1, 0, 1)
-            
-            if #self.selectedUpgrades == 0 then
-                love.graphics.setFont(getNativeFont(10))
-                love.graphics.printf("No boons yet claimed...", rightPageX, contentY, rightPageW, 'center')
-            else
-                local maxVisibleBoons = 4 
-                local numBoons = #self.selectedUpgrades
-                local maxScroll = math.max(0, numBoons - maxVisibleBoons)
-                
-                self.boonScrollOffset = math.max(0, math.min(maxScroll, self.boonScrollOffset))
-                
-                -- Scroll Indicator Top
-                if self.boonScrollOffset > 0 then
-                    love.graphics.setColor(0.5, 0.3, 0.1, 1)
-                    love.graphics.setFont(getNativeFont(10))
-                    love.graphics.printf("▲ More above (W to scroll up)", rightPageX, contentY - (20 * layoutScale), rightPageW, 'center')
-                end
-                
-                local yOffset = contentY
-                local startIndex = self.boonScrollOffset + 1
-                local endIndex = math.min(numBoons, startIndex + maxVisibleBoons - 1)
-                
-                for i = startIndex, endIndex do
-                    local upgrade = self.selectedUpgrades[i]
-                    
-                    love.graphics.setFont(getNativeFont(10)) -- Base 12px
-                    love.graphics.setColor(0.3, 0.1, 0.05, 1)
-                    
-                    local displayName = upgrade.name
-                    if upgrade.count and upgrade.count > 1 then
-                        displayName = displayName .. " x" .. upgrade.count
-                    end
-                    
-                    love.graphics.print("- " .. displayName, rightPageX, yOffset + (10 * layoutScale))
-                    yOffset = yOffset + (25 * layoutScale) 
-                    
-                    love.graphics.setFont(getNativeFont(10)) 
-                    love.graphics.setColor(0.4, 0.3, 0.2, 1)
-                    love.graphics.printf(upgrade.desc, rightPageX + (10 * layoutScale), yOffset + (5 * layoutScale), rightPageW - (10 * layoutScale), 'left')
-                    yOffset = yOffset + (55 * layoutScale) 
-                end
-                
-                -- Scroll Indicator Bottom
-                if self.boonScrollOffset < maxScroll then
-                    love.graphics.setColor(0.5, 0.3, 0.1, 1)
-                    love.graphics.setFont(getNativeFont(10))
-                    love.graphics.printf("▼ More below (S to scroll down)", rightPageX, yOffset + (10 * layoutScale), rightPageW, 'center')
-                end
-            end
-            
-            -- Footer
-            love.graphics.setFont(getNativeFont(10))
-            love.graphics.setColor(0.4, 0.3, 0.2, 1)
-            love.graphics.printf("A/D to flip pages", bookX + marginX, bookY + bookH - marginY - (35 * layoutScale), pageWidth, 'center')
-            
-        elseif spell then
-            -- Left Page: Illustration & Name
-            love.graphics.setColor(0.2, 0.1, 0, 1) 
-            love.graphics.setFont(getNativeFont(16)) -- Base 16px
-            love.graphics.printf(spellKey, contentX, contentY, pageWidth, 'center')
-            
-            -- Icon
-            local iconSize = 80 * scale 
-            local iconX = math.floor(contentX + (pageWidth / 2) - (iconSize/2))
-            local iconY = math.floor(contentY + (40 * layoutScale))
-            
-            if spellKey == 'IMP' then
-                love.graphics.setColor(1, 1, 1, 1)
-                local s = iconSize / 64
-                love.graphics.draw(Demon.impSprite, Demon.impQuads[self.grimoireAnimFrame], iconX, iconY, 0, s, s)
-            else
-                if spell.color then
-                    love.graphics.setColor(unpack(spell.color))
-                else
-                    love.graphics.setColor(1, 1, 1, 1)
-                end
-                love.graphics.rectangle('fill', iconX, iconY, iconSize, iconSize)
-                love.graphics.setColor(0, 0, 0, 1)
-                love.graphics.rectangle('line', iconX, iconY, iconSize, iconSize)
-            end
-            
-            -- Right Page: Details
-            local rightPageW = pageWidth
-            
-            love.graphics.setColor(0.2, 0.1, 0, 1)
-            love.graphics.setFont(getNativeFont(16)) -- Base 16px for Title
-            
-            local nameText = spell.name
-            if spell.type == 'summon' then
-                nameText = "Summon " .. nameText
-            elseif spell.type == 'upgrade' then
-                nameText = "Upgrade " .. nameText
-            end
-            
-            love.graphics.printf(nameText, rightPageX, contentY, rightPageW, 'left')
-            
-            love.graphics.setFont(getNativeFont(10)) -- Base 12px for Body
-            local yOffset = contentY + (60 * layoutScale)
-            
-            local displayCost = spell.cost
-            if spell.type == 'upgrade' then
-                displayCost = self:getUpgradeCost(spellKey)
-            end
-
-            local costText = "Cost: " .. displayCost
-            if spell.type == 'upgrade' then 
-                costText = costText .. " Souls" 
-            else 
-                costText = costText .. " Mana" 
-            end
-            love.graphics.print(costText, rightPageX, yOffset)
-            
-            if spell.attackRange then
-                love.graphics.print("Range: " .. spell.attackRange, rightPageX, yOffset + (20 * layoutScale))
-            end
-            
-            if spell.speed then
-                love.graphics.print("Speed: " .. spell.speed, rightPageX, yOffset + (40 * layoutScale))
-            end
-            
-            -- Description
-            if spell.description then
-                love.graphics.setColor(0.3, 0.2, 0.1, 1) 
-                love.graphics.setFont(getNativeFont(10))
-                local descYOffset = yOffset + (70 * layoutScale)
-                love.graphics.printf(spell.description, rightPageX, descYOffset, rightPageW, 'left')
-            end
-            
-            -- Footer
-            love.graphics.setFont(getNativeFont(10))
-            love.graphics.setColor(0.4, 0.3, 0.2, 1)
-            love.graphics.printf("A/D to flip pages", bookX + marginX, bookY + bookH - marginY - (35 * layoutScale), pageWidth, 'center')
-        end
-    end
-
-    -- Channeling Indicator
-    if self.isChanneling then
-        -- Draw Vignette
-        self.vignetteShader:send("screenDims", {winW, winH})
-        self.vignetteShader:send("time", love.timer.getTime())
-        love.graphics.setShader(self.vignetteShader)
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.rectangle('fill', 0, 0, winW, winH)
-        love.graphics.setShader()
-        
-        -- Draw Particles
-        love.graphics.setBlendMode('add')
-        for _, p in ipairs(self.meditateParticles) do
-            love.graphics.setColor(0.4, 0.8, 1, p.life / p.maxLife)
-            love.graphics.rectangle('fill', p.x, p.y, p.size, p.size)
-        end
-        love.graphics.setBlendMode('alpha')
-        
-        love.graphics.setColor(1, 1, 1, 1)
-        
-        -- Removed MEDITATING text per request
-        love.graphics.setColor(1, 1, 1, 1)
-    end
-    
-    -- Tutorial Overlay
-    if self.showTutorial then
-        local step = self.tutorialSteps[self.tutorialStep]
-        local overlayW = 500 * layoutScale
-        local overlayH = 250 * layoutScale
-        local overlayX = (winW - overlayW) / 2
-        local overlayY = (winH - overlayH) / 2
-        
-        -- Dark Background
-        love.graphics.setColor(0, 0, 0, 0.85)
-        love.graphics.rectangle('fill', overlayX, overlayY, overlayW, overlayH, 15)
-        
-        -- Gold Border
-        love.graphics.setColor(1, 0.8, 0, 1)
-        love.graphics.setLineWidth(3)
-        love.graphics.rectangle('line', overlayX, overlayY, overlayW, overlayH, 15)
-        love.graphics.setLineWidth(1)
-        
-        -- Title
-        love.graphics.setFont(getNativeFont(20))
-        love.graphics.printf(step.title, overlayX, overlayY + 30, overlayW, 'center')
-        
-        -- Text
-        love.graphics.setFont(getNativeFont(14))
-        love.graphics.setColor(1, 1, 1, 0.9)
-        love.graphics.printf(step.text, overlayX + 40, overlayY + 80, overlayW - 80, 'center')
-        
-        -- Click to continue
-        love.graphics.setFont(getNativeFont(10))
-        love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.printf("Click or Press SPACE to continue (" .. self.tutorialStep .. "/" .. #self.tutorialSteps .. ")", 
-            overlayX, overlayY + overlayH - 30, overlayW, 'center')
-    end
+    self.hud:render()
 end
+
 
 return PlayState
