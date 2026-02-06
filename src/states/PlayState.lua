@@ -62,8 +62,16 @@ function PlayState:enter(params)
     
     -- Castle Stats
     self.castleHealth = data and data.castleHealth or 3
+    self.maxCastleHealth = 3
     self.castleSignal = false 
     self.castleSignalTimer = 0
+    
+    -- Heart UI
+    self.heartsImage = love.graphics.newImage('imgs/hearts.png')
+    local hw = self.heartsImage:getWidth()
+    local hh = self.heartsImage:getHeight()
+    self.heartFullQuad = love.graphics.newQuad(0, 0, hw/2, hh, hw, hh)
+    self.heartEmptyQuad = love.graphics.newQuad(hw/2, 0, hw/2, hh, hw, hh)
     
     self.highlightedLane = 1
     self.floatingNumbers = {}
@@ -1035,9 +1043,8 @@ function PlayState:renderUI()
 
 
     -- UI: Mana Bar (Centered inside mana-bar.png)
-    local baseImgX, baseImgY = 20, 20
+    local baseImgX, baseImgY = 20, 20 -- Reverted to original position
     
-    -- Animation: Floating (Sine) + Random Sway (Noise)
     -- Animation: Floating (Sine) + Random Sway (Noise)
     local time = love.timer.getTime()
     
@@ -1061,6 +1068,35 @@ function PlayState:renderUI()
     
     -- Resolution Scale for manual offsets (Base: 1280x720)
     local resolutionScale = winW / 1280
+    
+    -- UI: Hearts (Centered ON TOP of Mana Bar in Z-axis)
+    -- Calculate dimensions
+    local heartSize = 64 * resolutionScale -- Smaller hearts for mana bar area
+    local heartSpacing = 5 * resolutionScale
+    
+    local hw = self.heartsImage:getWidth() / 2
+    local hh = self.heartsImage:getHeight()
+    local hScale = heartSize / hh
+    
+    -- Calculate positioning
+    local totalHeartW = (self.maxCastleHealth * heartSize) + ((self.maxCastleHealth - 1) * heartSpacing)
+    local manaBarCenterX = imgX + (imgW * scale) / 2
+    local heartsStartX = (winW / 2) - (totalHeartW / 2) -- Center on screen
+    -- Center vertically on the bar
+    local heartsY = imgY + (imgH * scale) / 2 - (heartSize / 2)
+    
+    love.graphics.setColor(1, 1, 1, 1)
+    
+    local curHeartX = heartsStartX
+    for i = 1, self.maxCastleHealth do
+        local quad = self.heartEmptyQuad
+        if i <= self.castleHealth then
+            quad = self.heartFullQuad
+        end
+        
+        love.graphics.draw(self.heartsImage, quad, curHeartX, heartsY, 0, hScale, hScale)
+        curHeartX = curHeartX + heartSize + heartSpacing
+    end
 
     -- 2. Calculate Bar Dimensions (Centered within the image)
     -- Scaling hardcoded values: 
@@ -1168,10 +1204,9 @@ function PlayState:renderUI()
         elseif target <= 40 then return gFonts['large']        -- 32px
         else return gFonts['huge'] end                         -- 48px
     end
-    
+
     -- UI: Castle Health
-    love.graphics.setFont(getNativeFont(16))
-    love.graphics.printf(self.castleHealth .. " Hearts", winW - (220 * layoutScale), 20 * layoutScale, 200 * layoutScale, 'right', 0, 1, 1)
+
     
     -- UI: Souls
     love.graphics.setColor(0.8, 0.4, 1, 1) -- Purple
