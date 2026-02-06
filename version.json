@@ -1,10 +1,10 @@
 {
-    "version": "0.1.6",
+    "version": "0.1.7",
     "files": [
         {
             "path": "main.lua",
             "url": "https://niconachoo.github.io/DunZum/main.lua",
-            "md5": "3083ef191b9b53a091e92965c90c41fe"
+            "md5": "b85e0200b64b4c14fc5575d043f52b71"
         },
         {
             "path": "src/HeroClasses.lua",
@@ -12,9 +12,19 @@
             "md5": "dafcd44d2d5193ff2865863991cdad8d"
         },
         {
+            "path": "src/InputManager.lua",
+            "url": "https://niconachoo.github.io/DunZum/src/InputManager.lua",
+            "md5": "2f6a340f71f7d03fd798c95318d5aef5"
+        },
+        {
             "path": "src/SaveManager.lua",
             "url": "https://niconachoo.github.io/DunZum/src/SaveManager.lua",
             "md5": "43c438957378704cbcd5f7666b03fcdb"
+        },
+        {
+            "path": "src/SettingsManager.lua",
+            "url": "https://niconachoo.github.io/DunZum/src/SettingsManager.lua",
+            "md5": "ae80ff06e88ffa0c746f38e8fabcd095"
         },
         {
             "path": "src/Projectile.lua",
@@ -25,6 +35,11 @@
             "path": "src/downloader_thread.lua",
             "url": "https://niconachoo.github.io/DunZum/src/downloader_thread.lua",
             "md5": "a170d9716f4935b011bfda815079cdf4"
+        },
+        {
+            "path": "src/MusicManager.lua",
+            "url": "https://niconachoo.github.io/DunZum/src/MusicManager.lua",
+            "md5": "9e8181ed0224b4ad0f913f4eb8062454"
         },
         {
             "path": "src/Grimoire.lua",
@@ -44,7 +59,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "71eb32348bfc73f25b382a11c9ba22ec"
+            "md5": "339fdc94a67c16607cb6c174711701a0"
         },
         {
             "path": "src/Demon.lua",
@@ -64,7 +79,7 @@
         {
             "path": "src/Dependencies.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Dependencies.lua",
-            "md5": "eb5874002e59fef76f859adb2ec86896"
+            "md5": "e33a8cced44d3a04c2a1cbab8763a154"
         },
         {
             "path": "src/Entity.lua",
@@ -79,22 +94,22 @@
         {
             "path": "src/states/OptionsState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/OptionsState.lua",
-            "md5": "4fa7505b95a2f7af0ce0aa2579c883c3"
+            "md5": "ef2b8becd62cf34f037671bb953151bf"
         },
         {
             "path": "src/states/PlayState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PlayState.lua",
-            "md5": "786b9d7abee22b9b5e3f054c16a4b5dc"
+            "md5": "0e3036519ab01d58d643257b15a4fc92"
         },
         {
             "path": "src/states/MenuState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/MenuState.lua",
-            "md5": "5432fa320ffe7c0d96f518eef508188d"
+            "md5": "8fad19c66fc7bfbcd220480aaa1858ea"
         },
         {
             "path": "src/states/PauseState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PauseState.lua",
-            "md5": "5a9dc4ae226beb316792c8c4cbdd42d3"
+            "md5": "88861071c975aade7470a1ca2aa09e04"
         },
         {
             "path": "src/states/UpdateState.lua",
