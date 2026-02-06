@@ -1073,12 +1073,17 @@ function PlayState:renderUI()
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(self.manaBarImage, imgX, imgY, 0, scale, scale)
     
-    -- 5. Mana Text
-    -- Offsets: 90 (4.5*20) -> 70 from X? NO, 4.5 * 20 = 90. 90-20 = 70.
-    -- Offsets: 40 (2*20) -> 20 from Y.
+    -- 5. Mana Text (Centered on bar)
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.setFont(gFonts['medium'])
-    love.graphics.print('Mana: ' .. math.floor(self.mana) .. '/' .. math.floor(self.maxMana), imgX + (70 * resolutionScale), imgY + (20 * resolutionScale), 0, resolutionScale, resolutionScale)
+    love.graphics.setFont(gFonts['medium_small'])
+    
+    local manaText = math.floor(self.mana) .. '/' .. math.floor(self.maxMana)
+    
+    -- Center vertically in the bar (Height 20 unscaled, Font 12 unscaled -> 4 offset)
+    local textY = barY + (4 * resolutionScale)
+    
+    -- Limit is 190 (unscaled bar width), centered
+    love.graphics.printf(manaText, barX, textY, 190, 'center', 0, resolutionScale, resolutionScale)
 
     -- Draw Mana Absorption Particles (On Top of HUD)
     love.graphics.setBlendMode('add')
