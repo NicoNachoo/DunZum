@@ -89,7 +89,7 @@
         {
             "path": "src/states/MenuState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/MenuState.lua",
-            "md5": "8ec5416987fdc8a1243c709994392b49"
+            "md5": "5432fa320ffe7c0d96f518eef508188d"
         },
         {
             "path": "src/states/PauseState.lua",
@@ -99,7 +99,7 @@
         {
             "path": "src/states/UpdateState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/UpdateState.lua",
-            "md5": "2221832846d617a48f9304505e12d5ff"
+            "md5": "756ab16aac2e02335f56e8985e88a795"
         },
         {
             "path": "src/states/UpgradeState.lua",
