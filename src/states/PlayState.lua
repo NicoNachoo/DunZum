@@ -222,8 +222,8 @@ end
 function PlayState:update(dt)
     -- Update Mana Animation Intensity
     local targetIntensity = self.isChanneling and 1 or 0
-    -- Lerp towards target (Speed 5 = fast but smooth)
-    self.manaAnimIntensity = self.manaAnimIntensity + (targetIntensity - self.manaAnimIntensity) * dt * 3
+    -- Lerp towards target (Speed 10 = faster stop)
+    self.manaAnimIntensity = self.manaAnimIntensity + (targetIntensity - self.manaAnimIntensity) * dt * 10
     
     -- Global Input (Pause)
     if InputManager:wasPressed('back') then
