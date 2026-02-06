@@ -35,6 +35,10 @@ function MenuState:new()
     self.background = love.graphics.newImage('imgs/menu.png')
 end
 
+function MenuState:enter()
+    MusicManager:stop()
+end
+
 function MenuState:update(dt)
     local mouseX, mouseY = love.mouse.getPosition()
     local winW, winH = love.graphics.getWidth(), love.graphics.getHeight()
@@ -68,19 +72,20 @@ function MenuState:update(dt)
             end
         end
     end
-end
-
-function MenuState:keypressed(key)
-    if key == 'up' or key == 'w' then
+    
+    -- Keyboard Input (Unified)
+    if InputManager:wasPressed('up') then
         self.highlightedIndex = self.highlightedIndex - 1
         if self.highlightedIndex < 1 then self.highlightedIndex = #self.menuItems end
-    elseif key == 'down' or key == 's' then
+    elseif InputManager:wasPressed('down') then
         self.highlightedIndex = self.highlightedIndex + 1
         if self.highlightedIndex > #self.menuItems then self.highlightedIndex = 1 end
-    elseif key == 'return' or key == 'kpenter' or key == 'space' then
+    elseif InputManager:wasPressed('confirm') then
         self.menuItems[self.highlightedIndex].action()
     end
 end
+
+-- Removed keypressed, using InputManager in update instead
 
 function MenuState:renderUI()
     local winW = love.graphics.getWidth()

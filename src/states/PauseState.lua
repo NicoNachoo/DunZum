@@ -56,24 +56,23 @@ function PauseState:update(dt)
         end
     end
     
-    if love.keyboard.wasPressed('escape') then
+    -- Keyboard Input (Unified)
+    if InputManager:wasPressed('up') then
+        self.highlightedIndex = self.highlightedIndex - 1
+        if self.highlightedIndex < 1 then self.highlightedIndex = #self.menuItems end
+    elseif InputManager:wasPressed('down') then
+        self.highlightedIndex = self.highlightedIndex + 1
+        if self.highlightedIndex > #self.menuItems then self.highlightedIndex = 1 end
+    elseif InputManager:wasPressed('confirm') then
+        self.menuItems[self.highlightedIndex].action()
+    elseif InputManager:wasPressed('back') then
         gStateMachine:pop()
     end
     
     self.timer = self.timer + dt
 end
 
-function PauseState:keypressed(key)
-    if key == 'up' or key == 'w' then
-        self.highlightedIndex = self.highlightedIndex - 1
-        if self.highlightedIndex < 1 then self.highlightedIndex = #self.menuItems end
-    elseif key == 'down' or key == 's' then
-        self.highlightedIndex = self.highlightedIndex + 1
-        if self.highlightedIndex > #self.menuItems then self.highlightedIndex = 1 end
-    elseif key == 'return' or key == 'kpenter' or key == 'space' then
-        self.menuItems[self.highlightedIndex].action()
-    end
-end
+-- Removed keypressed, using InputManager in update instead
 
 function PauseState:render()
     -- Dim the background (game is still rendering underneath)

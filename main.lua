@@ -13,6 +13,9 @@ function love.load()
     local tinyFont = love.graphics.newFont('fonts/pixel.ttf', 6)
     tinyFont:setFilter('nearest', 'nearest')
     
+    -- Load Music
+    MusicManager:addTrack('main_theme', 'music/Breakout_01.mp3')
+    
     local mediumFont = love.graphics.newFont('fonts/pixel.ttf', 16)
     mediumFont:setFilter('nearest', 'nearest')
     

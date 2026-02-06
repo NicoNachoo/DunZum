@@ -10,6 +10,9 @@ require 'src/Constants'
 State = require 'src/states/BaseState'
 StateMachine = require 'src/StateMachine'
 require 'src/Utils'
+SettingsManager = require 'src/SettingsManager'
+MusicManager = require 'src/MusicManager'
+InputManager = require 'src/InputManager'
 
 --
 -- Game States

@@ -5,6 +5,9 @@ function PlayState:enter(params)
     
     self.background = love.graphics.newImage('imgs/background.png')
     
+    -- Play Main Theme
+    MusicManager:play('main_theme')
+    
     local data = params and params.saveData
     
     self.mana = data and data.mana or 20
@@ -74,6 +77,9 @@ function PlayState:enter(params)
     self.bookImage = love.graphics.newImage('imgs/book.png')
     self.upgradeIcon = love.graphics.newImage('imgs/pentagram-upgrade.png')
     self.grimoireTargetY = love.graphics.getHeight()
+    
+    self.manaAnimIntensity = 0 -- For smooth animation ease-out
+    
     self.grimoirePage = 1
     self.grimoireSpells = {'IMP', 'VOIDWALKER', 'SUCCUBUS', 'MEDITATE', 'MANA', 'REGEN', 'HEAL', 'UPGRADES_LOG'}
     self.grimoireAnimTimer = 0
@@ -214,8 +220,60 @@ function PlayState:save()
 end
 
 function PlayState:update(dt)
-    if love.keyboard.wasPressed('escape') then
-        gStateMachine:push('pause')
+    -- Update Mana Animation Intensity
+    local targetIntensity = self.isChanneling and 1 or 0
+    -- Lerp towards target (Speed 5 = fast but smooth)
+    self.manaAnimIntensity = self.manaAnimIntensity + (targetIntensity - self.manaAnimIntensity) * dt * 3
+    
+    -- Global Input (Pause)
+    if InputManager:wasPressed('back') then
+        if self.showGrimoire then
+            self.showGrimoire = false
+        elseif self.isTyping then
+            self.isTyping = false
+            self.inputBuffer = ""
+        else
+            gStateMachine:push('pause')
+        end
+    end
+    
+    -- Grimoire Toggle (Tab)
+    if love.keyboard.wasPressed('tab') then
+        self.showGrimoire = not self.showGrimoire
+        if self.showGrimoire then
+            self.grimoirePage = 1 -- Reset to first page
+        end
+        self:breakChanneling()
+    end
+
+    -- Grimoire Navigation
+    if self.showGrimoire then
+        if InputManager:wasPressed('left') then
+            self.grimoirePage = math.max(1, self.grimoirePage - 1)
+            self.boonScrollOffset = 0
+        elseif InputManager:wasPressed('right') then
+            self.grimoirePage = math.min(#self.grimoireSpells, self.grimoirePage + 1)
+            self.boonScrollOffset = 0
+        end
+        
+        -- Scroll on boons page
+        local spellKey = self.grimoireSpells[self.grimoirePage]
+        if spellKey == 'UPGRADES_LOG' then
+            local numBoons = #self.selectedUpgrades
+            local maxVisibleBoons = 5
+            local maxScroll = math.max(0, numBoons - maxVisibleBoons)
+            
+            if InputManager:wasPressed('up') then
+                self.boonScrollOffset = math.max(0, self.boonScrollOffset - 1)
+            elseif InputManager:wasPressed('down') then
+                self.boonScrollOffset = math.min(maxScroll, self.boonScrollOffset + 1)
+            end
+        end
+        
+        -- While Grimoire is open, block other updates? 
+        -- Original code returned here if showGrimoire was true inside update...
+        -- Wait, update() handles animations even when grimoire is opening. 
+        -- But logic paused.
     end
     
     -- Toggle Grimoire handled in keypressed
@@ -434,6 +492,30 @@ function PlayState:update(dt)
         unit:update(dt, self)
     end
     
+    -- Selection / Typing Logic (Only if not in Grimoire)
+    if not self.showGrimoire then
+        if self.isTyping then
+            if love.keyboard.wasPressed('backspace') then
+                self.inputBuffer = string.sub(self.inputBuffer, 1, -2)
+            elseif InputManager:wasPressed('confirm') then
+                self:trySummon()
+            end
+        else
+            -- Selection Mode
+            if InputManager:wasPressed('up') then
+                self.highlightedLane = math.max(1, self.highlightedLane - 1)
+                self:breakChanneling()
+            elseif InputManager:wasPressed('down') then
+                self.highlightedLane = math.min(NUM_LANES, self.highlightedLane + 1)
+                self:breakChanneling()
+            elseif InputManager:wasPressed('confirm') then
+                self.isTyping = true
+                self.inputBuffer = ""
+                self:breakChanneling()
+            end
+        end
+    end
+
     -- Update Projectiles
     for i = #self.projectiles, 1, -1 do
         local p = self.projectiles[i]
@@ -774,72 +856,7 @@ function PlayState:textinput(t)
     end
 end
 
-function PlayState:keypressed(key)
-    if key == 'tab' then
-        self.showGrimoire = not self.showGrimoire
-        if self.showGrimoire then
-            self.grimoirePage = 1 -- Reset to first page
-        end
-        self:breakChanneling()
-        return
-    end
-
-    if self.showGrimoire then
-        if key == 'escape' then
-             self.showGrimoire = false
-        elseif key == 'a' then
-            self.grimoirePage = math.max(1, self.grimoirePage - 1)
-            self.boonScrollOffset = 0 -- Reset scroll when changing pages
-        elseif key == 'd' then
-            self.grimoirePage = math.min(#self.grimoireSpells, self.grimoirePage + 1)
-            self.boonScrollOffset = 0 -- Reset scroll when changing pages
-        elseif key == 'w' or key == 's' then
-            -- Scroll on boons page
-            local spellKey = self.grimoireSpells[self.grimoirePage]
-            if spellKey == 'UPGRADES_LOG' then
-                local numBoons = #self.selectedUpgrades
-                local maxVisibleBoons = 5 -- Maximum boons visible at once
-                local maxScroll = math.max(0, numBoons - maxVisibleBoons)
-                
-                if key == 'w' then
-                    self.boonScrollOffset = math.max(0, self.boonScrollOffset - 1)
-                elseif key == 's' then
-                    self.boonScrollOffset = math.min(maxScroll, self.boonScrollOffset + 1)
-                end
-            end
-        end
-        return
-    end
-
-    if self.isTyping then
-        if key == 'backspace' then
-            self.inputBuffer = string.sub(self.inputBuffer, 1, -2)
-        elseif key == 'return' then
-            -- Attempt summon
-            self:trySummon()
-            -- Whether success or fail, we stop typing? 
-            -- For flow: Success -> Stop Typing. Fail -> Keep Typing? 
-            -- Let's say Return always tries to submit. 
-            -- If user wants to cancel, they press Escape.
-        elseif key == 'escape' then
-            self.isTyping = false
-            self.inputBuffer = ""
-        end
-    else
-        -- Selection Mode
-        if key == 'w' then
-            self.highlightedLane = math.max(1, self.highlightedLane - 1)
-            self:breakChanneling()
-        elseif key == 's' then
-            self.highlightedLane = math.min(NUM_LANES, self.highlightedLane + 1)
-            self:breakChanneling()
-        elseif key == 'return' then
-            self.isTyping = true
-            self.inputBuffer = ""
-            self:breakChanneling()
-        end
-    end
-end
+-- Removed keypressed, using InputManager in update instead
 
 function PlayState:trySummon()
     local spell = Grimoire[self.inputBuffer]
@@ -994,9 +1011,16 @@ function PlayState:renderUI()
     local baseImgX, baseImgY = 20, 20
     
     -- Animation: Floating (Sine) + Random Sway (Noise)
+    -- Animation: Floating (Sine) + Random Sway (Noise)
     local time = love.timer.getTime()
-    local floatOffset = math.sin(time * 1.5) * 5 -- Vertical floating
-    local swayOffset = (love.math.noise(time * 0.5) - 0.5) * 20 -- Slow random horizontal sway
+    
+    -- Calculate raw offsets
+    local rawFloat = math.sin(time * 1.5) * 5 -- Vertical floating
+    local rawSway = (love.math.noise(time * 0.5) - 0.5) * 20 -- Slow random horizontal sway
+    
+    -- Apply smoothed intensity
+    local floatOffset = rawFloat * self.manaAnimIntensity
+    local swayOffset = rawSway * self.manaAnimIntensity
     
     local imgX = math.floor(baseImgX + swayOffset)
     local imgY = math.floor(baseImgY + floatOffset)
@@ -1389,9 +1413,7 @@ function PlayState:renderUI()
         
         love.graphics.setColor(1, 1, 1, 1)
         
-        love.graphics.setFont(gFonts['medium'])
-        love.graphics.setColor(0.4, 0.8, 1, 1)
-        love.graphics.printf("~ MEDITATING ~", 0, 70, winW, 'center')
+        -- Removed MEDITATING text per request
         love.graphics.setColor(1, 1, 1, 1)
     end
     
