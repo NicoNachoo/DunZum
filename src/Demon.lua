@@ -51,6 +51,8 @@ end
 function Demon:update(dt, playState)
     Demon.super.update(self, dt)
     
+
+    
     if self.state == 'WALK' then
         self.x = self.x + self.speed * dt
         

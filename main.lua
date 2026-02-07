@@ -15,6 +15,7 @@ function love.load()
     
     -- Load Music
     MusicManager:addTrack('main_theme', 'music/Breakout_01.mp3')
+    MusicManager:addTrack('menu_theme', 'music/Title_Screen_v0.mp3')
     
     local mediumFont = love.graphics.newFont('fonts/pixel.ttf', 16)
     mediumFont:setFilter('nearest', 'nearest')
@@ -63,6 +64,9 @@ function love.load()
     gUpdateFiles = nil
     gUpdateThread = love.thread.newThread("src/downloader_thread.lua")
     gUpdateThread:start()
+    
+    -- Load Hero Sprites
+    gHeroSpriteManager:load()
     
     -- Start background check
     local commandChannel = love.thread.getChannel('update_commands')

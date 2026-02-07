@@ -36,7 +36,7 @@ function MenuState:new()
 end
 
 function MenuState:enter()
-    MusicManager:stop()
+    MusicManager:play('menu_theme')
 end
 
 function MenuState:update(dt)

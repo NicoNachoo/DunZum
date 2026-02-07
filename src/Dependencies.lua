@@ -39,4 +39,6 @@ ParticleManager = require 'src/ParticleManager'
 SaveManager = require 'src/SaveManager'
 FloatingNumber = require 'src/FloatingNumber'
 HUD = require 'src/HUD'
+HeroSpriteManager = require 'src/HeroSpriteManager'
+gHeroSpriteManager = HeroSpriteManager
 

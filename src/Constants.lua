@@ -19,3 +19,13 @@ SLOT_WIDTH = 40
 SLOT_PADDING = 10
 
 HERO_SPAWN_RATE = 4 -- Seconds between spawns
+
+HERO_ANIMATIONS = {
+    ['KNIGHT'] = {
+        ['WALK']    = { texture = 'imgs/Knight/Knight_Run.png', frames = 6, duration = 0.1, scale = 0.2 },
+        ['IDLE']    = { texture = 'imgs/Knight/Knight_Idle.png', frames = 8, duration = 0.1, scale = 0.2 },
+        ['ATTACK1'] = { texture = 'imgs/Knight/Knight_Attack1.png', frames = 4, duration = 0.1, scale = 0.2 },
+        ['ATTACK2'] = { texture = 'imgs/Knight/Knight_Attack2.png', frames = 4, duration = 0.1, scale = 0.2 },
+        ['GUARD']   = { texture = 'imgs/Knight/Knight_Guard.png', frames = 6, duration = 0.1, scale = 0.2 }
+    }
+}

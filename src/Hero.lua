@@ -25,81 +25,113 @@ function Hero:new(x, y, width, height, classType, level)
     
     self.enchanted = false
     self.isHero = true
+    
+    -- Animation state
+    self.animTimer = 0
+    self.animState = 'WALK'
+    self.attackAnimTimer = 0
+    self.attackAnimTimer = 0
+    self.hasDealtDamage = false
+    
+    self.attackVariant = 1
+    self.hurtTimer = 0
+end
+
+function Hero:takeDamage(amount, playState, attacker, color)
+    Hero.super.takeDamage(self, amount, playState, attacker, color)
+    self.hurtTimer = 0.6 -- 6 frames * 0.1s
 end
 
 function Hero:update(dt, playState)
     Hero.super.update(self, dt)
+    self.animTimer = self.animTimer + dt
     
+    if self.attackAnimTimer > 0 then self.attackAnimTimer = self.attackAnimTimer - dt end
+    if self.hurtTimer > 0 then self.hurtTimer = self.hurtTimer - dt end
+    
+    -- Determine Animation State
+    if self.state == 'ATTACK' and self.attackAnimTimer > 0 then
+        self.animState = 'ATTACK' .. self.attackVariant
+    elseif self.hurtTimer > 0 then
+        self.animState = 'GUARD'
+    elseif self.state == 'ATTACK' then
+        self.animState = 'IDLE'
+    else
+        self.animState = 'WALK'
+    end
+
     if self.state == 'WALK' then
+        -- Stop moving if guarding/hurt
         if self.enchanted then
             self.x = self.x + self.speed * dt
         else
             self.x = self.x - self.speed * dt
         end
     elseif self.state == 'ATTACK' then
+        -- Stop attacking cooldown if guarding/hurt
         self.attackTimer = self.attackTimer + dt
-        
-        -- Behavior Logic
-        if self.behavior == 'SUPPORT' then
-             if self.attackTimer >= self.attackRate then
-                 if self.target and not self.target.dead then
-                    self.attackTimer = 0
-                    
-                    if self.target.type == self.type then
-                         -- Heal Logic
-                         self.target.hp = math.min(self.target.maxHp, self.target.hp + self.healAmount)
-                         gParticleManager:spawnHealEffect(self.target.x + self.target.width/2, self.target.y + self.target.height/2)
-                    else
-                        -- Attack Logic (Self Defense)
-                        self.target:takeDamage(self.damage, playState, self)
+            
+            -- Handle Mid-Animation Damage
+            if self.attackAnimTimer > 0 and not self.hasDealtDamage then
+                -- Trigger damage at ~50% of animation (animation is 0.4s, so at 0.2s left)
+                if self.attackAnimTimer <= 0.2 then
+                    self.hasDealtDamage = true
+                    if self.target and not self.target.dead then
+                        if self.behavior == 'SUPPORT' and self.target.type == self.type then
+                             -- Heal Logic
+                             self.target.hp = math.min(self.target.maxHp, self.target.hp + self.healAmount)
+                             gParticleManager:spawnHealEffect(self.target.x + self.target.width/2, self.target.y + self.target.height/2)
+                             
+                        elseif self.behavior == 'RANGED' then
+                             -- Shoot Projectile
+                             if playState then
+                                 local spawnOffset = self.enchanted and self.width + 6 or -6
+                                 local speed = self.enchanted and math.abs(self.projectileSpeed) or -math.abs(self.projectileSpeed)
+                                 
+                                 local p = Projectile(
+                                     self.x + spawnOffset,
+                                     self.y + self.height/2 - 3,
+                                     nil, -- No specific target for linear
+                                     self.damage,
+                                     speed,
+                                     self.type, -- Team (can be 'hero' or 'demon')
+                                     self.color, -- Projectile color matches hero
+                                     self
+                                 )
+                                 table.insert(playState.projectiles, p)
+                             end
+                             
+                        else -- MELEE / SUPPORT Attack
+                            self.target:takeDamage(self.damage, playState, self)
+                        end
                     end
-                 end
-             end
-             
-             -- If target is full HP or dead, resume walking?
-             if not self.target or self.target.dead or self.target.hp >= self.target.maxHp then
-                 self.target = nil
-                 self.state = 'WALK'
-             end
-             
-        elseif self.behavior == 'RANGED' then
-            if self.attackTimer >= self.attackRate then
-                 self.attackTimer = 0
-                 -- Shoot Projectile
-                 if playState then
-                     local spawnOffset = self.enchanted and self.width + 6 or -6
-                     local speed = self.enchanted and math.abs(self.projectileSpeed) or -math.abs(self.projectileSpeed)
-                     
-                     local p = Projectile(
-                         self.x + spawnOffset,
-                         self.y + self.height/2 - 3,
-                         nil, -- No specific target for linear
-                         self.damage,
-                         speed,
-                         self.type, -- Team (can be 'hero' or 'demon')
-                         self.color, -- Projectile color matches hero
-                         self
-                     )
-                     table.insert(playState.projectiles, p)
-                 end
+                end
             end
             
-             -- If no enemies in range (logic handled in PlayState), verify if we should still stop?
-             -- PlayState sets state to ATTACK if enemy in range.
-             -- If enemy dies, PlayState sets to WALK.
-             
-        else -- MELEE
-             if self.target and not self.target.dead then
+            -- Start New Attack Logic
+            if self.attackAnimTimer <= 0 then -- Only start new attack if previous anim done
                 if self.attackTimer >= self.attackRate then
-                    self.attackTimer = 0
-                    self.target:takeDamage(self.damage, playState, self)
+                    -- Check Target Validity
+                    if self.target and not self.target.dead then
+                        -- Check Range for Ranged units? (Handled in PlayState for state switching, but good to double check)
+                         self.attackTimer = 0
+                         self.attackAnimTimer = 0.4 -- Start attack anim
+                         self.hasDealtDamage = false -- Reset damage flag
+                         -- Toggle Variant
+                         self.attackVariant = self.attackVariant == 1 and 2 or 1
+                    else
+                         -- Target dead/gone
+                         self.state = 'WALK'
+                         self.target = nil
+                    end
                 end
-             else
-                self.state = 'WALK'
-                 self.target = nil
-             end
-        end
+            end
     end
+end
+
+function Hero:render()
+    gHeroSpriteManager:draw(self)
+    self:renderHealthBar()
 end
 
 function Hero:enchant()
@@ -116,5 +148,7 @@ function Hero:enchant()
         gParticleManager:spawnPortalEffect(self.x + self.width/2, self.y + self.height/2)
     end
 end
+
+
 
 return Hero

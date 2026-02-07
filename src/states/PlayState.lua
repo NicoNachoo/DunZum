@@ -5,6 +5,7 @@ function PlayState:enter(params)
     
     self.background = love.graphics.newImage('imgs/background.png')
     
+    MusicManager:stop()
     -- Play Main Theme
     MusicManager:play('main_theme')
     
