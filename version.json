@@ -1,10 +1,10 @@
 {
-    "version": "0.1.10",
+    "version": "0.1.11",
     "files": [
         {
             "path": "main.lua",
             "url": "https://niconachoo.github.io/DunZum/main.lua",
-            "md5": "b85e0200b64b4c14fc5575d043f52b71"
+            "md5": "591778eaa649fcf3489fc3263b1314d3"
         },
         {
             "path": "src/HeroClasses.lua",
@@ -37,6 +37,11 @@
             "md5": "a170d9716f4935b011bfda815079cdf4"
         },
         {
+            "path": "src/HeroSpriteManager.lua",
+            "url": "https://niconachoo.github.io/DunZum/src/HeroSpriteManager.lua",
+            "md5": "703ca224fae83a9f6ee54a28d4024629"
+        },
+        {
             "path": "src/MusicManager.lua",
             "url": "https://niconachoo.github.io/DunZum/src/MusicManager.lua",
             "md5": "9e8181ed0224b4ad0f913f4eb8062454"
@@ -59,12 +64,12 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "163d27ec762ea350c4bb77e789b617a3"
+            "md5": "1259a4230935dd95f91471a050f8b004"
         },
         {
             "path": "src/Demon.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Demon.lua",
-            "md5": "f08de14bf278d70b0b2e9f3083a41831"
+            "md5": "a24bcbb3d34742ccf1c69c05283fb1b3"
         },
         {
             "path": "src/ParticleManager.lua",
@@ -72,14 +77,19 @@
             "md5": "322f78e5311e0fa4dbf537d748eb2c39"
         },
         {
+            "path": "src/HUD.lua",
+            "url": "https://niconachoo.github.io/DunZum/src/HUD.lua",
+            "md5": "4848c54d70b2b34f5c46b40d0e64c493"
+        },
+        {
             "path": "src/Hero.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Hero.lua",
-            "md5": "e2164285b2ae50907684607edca67ba2"
+            "md5": "4c8a5ecc8fc1578983a5a3363a2fbbf8"
         },
         {
             "path": "src/Dependencies.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Dependencies.lua",
-            "md5": "e33a8cced44d3a04c2a1cbab8763a154"
+            "md5": "6814076a19c8e6ec6d7d739af83533f1"
         },
         {
             "path": "src/Entity.lua",
@@ -99,12 +109,12 @@
         {
             "path": "src/states/PlayState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PlayState.lua",
-            "md5": "ea54cf047a593eb1b7c9c11a608c42cc"
+            "md5": "490911eaf8a847c2bfa8074681dd671e"
         },
         {
             "path": "src/states/MenuState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/MenuState.lua",
-            "md5": "8fad19c66fc7bfbcd220480aaa1858ea"
+            "md5": "382ba3a3a26aa3681127a0b06411a9f4"
         },
         {
             "path": "src/states/PauseState.lua",
@@ -130,6 +140,11 @@
             "path": "src/states/BaseState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/BaseState.lua",
             "md5": "ce256f7e6d50cc3c95e95e55e7b732b8"
+        },
+        {
+            "path": "music/Title_Screen_v0.mp3",
+            "url": "https://niconachoo.github.io/DunZum/music/Title_Screen_v0.mp3",
+            "md5": "08deb9de017efea2fceac07fb0966caa"
         },
         {
             "path": "music/Breakout_01.mp3",
@@ -175,6 +190,31 @@
             "path": "imgs/scroll-upgrade.png",
             "url": "https://niconachoo.github.io/DunZum/imgs/scroll-upgrade.png",
             "md5": "35d79fd62279705292fd5e41d3c17f4c"
+        },
+        {
+            "path": "imgs/Knight/Knight_Run.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Knight/Knight_Run.png",
+            "md5": "b4d84f67b87667af9c6dbd53b6db4cac"
+        },
+        {
+            "path": "imgs/Knight/Knight_Guard.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Knight/Knight_Guard.png",
+            "md5": "7d149cb4426bc6da08c6499a74a352af"
+        },
+        {
+            "path": "imgs/Knight/Knight_Idle.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Knight/Knight_Idle.png",
+            "md5": "c1e8da18c01d34894604aa90c5bcb18b"
+        },
+        {
+            "path": "imgs/Knight/Knight_Attack2.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Knight/Knight_Attack2.png",
+            "md5": "02fe0e15a5c455a799c033d40b5f514b"
+        },
+        {
+            "path": "imgs/Knight/Knight_Attack1.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Knight/Knight_Attack1.png",
+            "md5": "d5efda4b2b646442a318118f08a95b32"
         },
         {
             "path": "lib/json.lua",
