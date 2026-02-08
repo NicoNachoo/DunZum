@@ -1,5 +1,5 @@
 {
-    "version": "0.1.11",
+    "version": "0.1.12",
     "files": [
         {
             "path": "main.lua",
@@ -64,7 +64,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "1259a4230935dd95f91471a050f8b004"
+            "md5": "9e489d7e963bf7632262d9ea4640087e"
         },
         {
             "path": "src/Demon.lua",
@@ -84,7 +84,7 @@
         {
             "path": "src/Hero.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Hero.lua",
-            "md5": "4c8a5ecc8fc1578983a5a3363a2fbbf8"
+            "md5": "7a9c75d97f60c1a3b23533b052aeb4b7"
         },
         {
             "path": "src/Dependencies.lua",
