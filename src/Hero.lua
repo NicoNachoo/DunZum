@@ -34,26 +34,32 @@ function Hero:new(x, y, width, height, classType, level)
     self.hasDealtDamage = false
     
     self.attackVariant = 1
-    self.hurtTimer = 0
+    self.lockedAnimTimer = 0
+    self.lockedAnim = nil
 end
 
 function Hero:takeDamage(amount, playState, attacker, color)
     Hero.super.takeDamage(self, amount, playState, attacker, color)
-    self.hurtTimer = 0.6 -- 6 frames * 0.1s
+    
+    -- Only guard if not already in a locked animation (like attacking)
+    if self.lockedAnimTimer <= 0 then
+        self.lockedAnim = 'GUARD'
+        self.lockedAnimTimer = 0.6 -- Guard duration
+        self.animTimer = 0 -- Reset animation frame
+    end
 end
 
 function Hero:update(dt, playState)
     Hero.super.update(self, dt)
     self.animTimer = self.animTimer + dt
     
+    -- Update Timers
     if self.attackAnimTimer > 0 then self.attackAnimTimer = self.attackAnimTimer - dt end
-    if self.hurtTimer > 0 then self.hurtTimer = self.hurtTimer - dt end
+    if self.lockedAnimTimer > 0 then self.lockedAnimTimer = self.lockedAnimTimer - dt end
     
     -- Determine Animation State
-    if self.state == 'ATTACK' and self.attackAnimTimer > 0 then
-        self.animState = 'ATTACK' .. self.attackVariant
-    elseif self.hurtTimer > 0 then
-        self.animState = 'GUARD'
+    if self.lockedAnimTimer > 0 then
+        self.animState = self.lockedAnim
     elseif self.state == 'ATTACK' then
         self.animState = 'IDLE'
     else
@@ -114,11 +120,19 @@ function Hero:update(dt, playState)
                     -- Check Target Validity
                     if self.target and not self.target.dead then
                         -- Check Range for Ranged units? (Handled in PlayState for state switching, but good to double check)
-                         self.attackTimer = 0
-                         self.attackAnimTimer = 0.4 -- Start attack anim
-                         self.hasDealtDamage = false -- Reset damage flag
-                         -- Toggle Variant
-                         self.attackVariant = self.attackVariant == 1 and 2 or 1
+                         if self.lockedAnimTimer <= 0 then -- Only attack if not locked (e.g. recovering from hit or prev attack)
+                             self.attackTimer = 0
+                             self.attackAnimTimer = 0.4 -- Used for logic/timing events
+                             
+                             -- Lock Animation
+                             self.lockedAnim = 'ATTACK' .. self.attackVariant
+                             self.lockedAnimTimer = 0.4 
+                             self.animTimer = 0 -- Reset animation frame 
+                             
+                             self.hasDealtDamage = false -- Reset damage flag
+                             -- Toggle Variant
+                             self.attackVariant = self.attackVariant == 1 and 2 or 1
+                         end
                     else
                          -- Target dead/gone
                          self.state = 'WALK'
