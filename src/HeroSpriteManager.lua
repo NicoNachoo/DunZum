@@ -11,8 +11,8 @@ function HeroSpriteManager:load()
         self.quads[class] = {}
         
         for state, config in pairs(anims) do
-            -- Load Texture
-            if love.filesystem.getInfo(config.texture) then
+            -- Load Texture if valid animation config
+            if config.frames and love.filesystem.getInfo(config.texture) then
                 local img = love.graphics.newImage(config.texture)
                 self.sheets[class][state] = img
                 
@@ -26,8 +26,8 @@ function HeroSpriteManager:load()
                         i * frameWidth, 0, frameWidth, frameHeight, img:getDimensions()
                     ))
                 end
-            else
-                print("HeroSpriteManager: Could not find texture at " .. config.texture)
+            elseif config.frames then
+                 print("HeroSpriteManager: Could not find texture at " .. config.texture)
             end
         end
     end

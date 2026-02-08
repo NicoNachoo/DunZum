@@ -100,6 +100,8 @@ function Hero:update(dt, playState)
                                  local spawnOffset = self.enchanted and self.width + 6 or -6
                                  local speed = self.enchanted and math.abs(self.projectileSpeed) or -math.abs(self.projectileSpeed)
                                  
+                                 local projectileConfig = HERO_ANIMATIONS[self.classType] and HERO_ANIMATIONS[self.classType]['PROJECTILE']
+                                 
                                  local p = Projectile(
                                      self.x + spawnOffset,
                                      self.y + self.height/2 - 3,
@@ -108,7 +110,8 @@ function Hero:update(dt, playState)
                                      speed,
                                      self.type, -- Team (can be 'hero' or 'demon')
                                      self.color, -- Projectile color matches hero
-                                     self
+                                     self,
+                                     projectileConfig
                                  )
                                  table.insert(playState.projectiles, p)
                              end

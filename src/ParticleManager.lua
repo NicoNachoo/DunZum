@@ -14,23 +14,25 @@ function ParticleManager:new()
     self.spriteEffects = {}
     
     -- Load Heal Effect
-    if love.filesystem.getInfo(HEAL_EFFECT.texture) then
-        self.healEffectImg = love.graphics.newImage(HEAL_EFFECT.texture)
+    local healDef = HERO_ANIMATIONS['PRIEST']['HEAL_EFFECT']
+    if healDef and love.filesystem.getInfo(healDef.texture) then
+        self.healEffectImg = love.graphics.newImage(healDef.texture)
         self.healEffectQuads = {}
-        local fw = self.healEffectImg:getWidth() / HEAL_EFFECT.frames
+        local fw = self.healEffectImg:getWidth() / healDef.frames
         local fh = self.healEffectImg:getHeight()
-        for i = 0, HEAL_EFFECT.frames - 1 do
+        for i = 0, healDef.frames - 1 do
             table.insert(self.healEffectQuads, love.graphics.newQuad(i * fw, 0, fw, fh, self.healEffectImg:getDimensions()))
         end
     end
     
     -- Load Priest Attack Effect
-    if love.filesystem.getInfo(PRIEST_ATTACK_EFFECT.texture) then
-        self.priestAttackEffectSprite = love.graphics.newImage(PRIEST_ATTACK_EFFECT.texture)
+    local attackDef = HERO_ANIMATIONS['PRIEST']['ATTACK_EFFECT']
+    if attackDef and love.filesystem.getInfo(attackDef.texture) then
+        self.priestAttackEffectSprite = love.graphics.newImage(attackDef.texture)
         self.priestAttackEffectQuads = {}
-        local fw = self.priestAttackEffectSprite:getWidth() / PRIEST_ATTACK_EFFECT.frames
+        local fw = self.priestAttackEffectSprite:getWidth() / attackDef.frames
         local fh = self.priestAttackEffectSprite:getHeight()
-        for i = 0, PRIEST_ATTACK_EFFECT.frames - 1 do
+        for i = 0, attackDef.frames - 1 do
             table.insert(self.priestAttackEffectQuads, love.graphics.newQuad(i * fw, 0, fw, fh, self.priestAttackEffectSprite:getDimensions()))
         end
     end
@@ -94,25 +96,27 @@ end
 
 function ParticleManager:spawnHealEffectSprite(x, y)
     if not self.healEffectImg then return end
+    local def = HERO_ANIMATIONS['PRIEST']['HEAL_EFFECT']
     table.insert(self.spriteEffects, {
         type = 'HEAL',
         x = x,
         y = y,
         timer = 0,
-        duration = HEAL_EFFECT.duration * HEAL_EFFECT.frames,
-        frameDuration = HEAL_EFFECT.duration
+        duration = def.duration * def.frames,
+        frameDuration = def.duration
     })
 end
 
 function ParticleManager:spawnPriestAttackEffect(x, y)
     if not self.priestAttackEffectSprite then return end
+    local def = HERO_ANIMATIONS['PRIEST']['ATTACK_EFFECT']
     table.insert(self.spriteEffects, {
         type = 'PRIEST_ATTACK',
         x = x,
         y = y,
         timer = 0,
-        duration = PRIEST_ATTACK_EFFECT.duration * PRIEST_ATTACK_EFFECT.frames,
-        frameDuration = PRIEST_ATTACK_EFFECT.duration
+        duration = def.duration * def.frames,
+        frameDuration = def.duration
     })
 end
 
@@ -194,11 +198,11 @@ function ParticleManager:render()
         if effect.type == 'HEAL' then
              img = self.healEffectImg
              quads = self.healEffectQuads
-             scale = HEAL_EFFECT.scale
+             scale = HERO_ANIMATIONS['PRIEST']['HEAL_EFFECT'].scale
         elseif effect.type == 'PRIEST_ATTACK' then
              img = self.priestAttackEffectSprite
              quads = self.priestAttackEffectQuads
-             scale = PRIEST_ATTACK_EFFECT.scale
+             scale = HERO_ANIMATIONS['PRIEST']['ATTACK_EFFECT'].scale
         end
         
         if img and quads then
