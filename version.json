@@ -1,5 +1,5 @@
 {
-    "version": "0.1.12",
+    "version": "0.1.13",
     "files": [
         {
             "path": "main.lua",
@@ -64,7 +64,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "9dc4bdd9410fa5849a43621f333fe906"
+            "md5": "3497d1921afc80bede393ae5d00d5966"
         },
         {
             "path": "src/Demon.lua",
