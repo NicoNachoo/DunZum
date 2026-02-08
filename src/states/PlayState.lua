@@ -28,7 +28,11 @@ function PlayState:enter(params)
             elseif uData.type == 'demon' then
                 unit = Demon(uData.x, uData.y, uData.width, uData.height, uData.color, uData.speed, uData.attackRange, uData.originalCost)
                 unit.demonType = uData.demonType
-                unit.currentShield = uData.currentShield
+                -- Shield is now Mana
+                if uData.currentShield then -- Legacy support
+                    unit.mana = uData.currentShield
+                    unit.maxMana = 50
+                end
                 unit.isEnraged = uData.isEnraged
                 
                 if unit.isEnraged then
@@ -39,6 +43,10 @@ function PlayState:enter(params)
                 unit = Hero(uData.x, uData.y, uData.width, uData.height, uData.classType, uData.level)
             end
             unit.hp = uData.hp
+            unit.maxHp = uData.maxHp -- Restore maxHp to fix healthbar glitch
+            if uData.mana then unit.mana = uData.mana end
+            if uData.maxMana then unit.maxMana = uData.maxMana end
+            
             unit.lane = uData.lane
             unit.state = uData.state
             table.insert(self.activeUnits, unit)
@@ -163,9 +171,12 @@ function PlayState:serializeState()
             uData.speed = u.speed
             uData.attackRange = u.attackRange
             uData.demonType = u.demonType
-            uData.currentShield = u.currentShield
             uData.isEnraged = u.isEnraged
         end
+        -- Save Mana
+        uData.mana = u.mana
+        uData.maxMana = u.maxMana
+        
         table.insert(units, uData)
     end
 
@@ -440,6 +451,9 @@ function PlayState:update(dt)
     -- Check for collisions/range between opposing units
     -- This is O(N^2) but N is small (num units)
     for i, unitA in ipairs(self.activeUnits) do
+        -- ONLY Update Targeting if NOT in a locked animation
+        if unitA.lockedAnimTimer <= 0 then
+            
         if unitA.type == 'demon' then
             if unitA.behavior == 'SUPPORT' then
                 -- Scans for INJURED ALLIES (Demons/Charmed)
@@ -447,7 +461,7 @@ function PlayState:update(dt)
                 local minHpRatio = 1.0
                 
                 for j, unitB in ipairs(self.activeUnits) do
-                    if unitB.type == 'demon' and unitA.lane == unitB.lane and not unitB.dead and unitB ~= unitA then
+                    if unitB.type == 'demon' and unitA.lane == unitB.lane and not unitB.dead and unitB ~= unitA and unitB.state ~= 'WALK' then
                         local dist = math.abs(unitA.x - unitB.x)
                         if dist <= unitA.attackRange then
                             local ratio = unitB.hp / unitB.maxHp
@@ -528,7 +542,7 @@ function PlayState:update(dt)
                  local minHpRatio = 1.0
                  
                  for j, unitB in ipairs(self.activeUnits) do
-                     if unitB.type == 'hero' and unitA.lane == unitB.lane and not unitB.dead and unitB ~= unitA then
+                     if unitB.type == 'hero' and unitA.lane == unitB.lane and not unitB.dead and unitB ~= unitA and unitB.state ~= 'WALK' then
                          local dist = math.abs(unitA.x - unitB.x)
                          if dist <= unitA.attackRange then
                              local ratio = unitB.hp / unitB.maxHp
@@ -594,6 +608,8 @@ function PlayState:update(dt)
                  end
              end
         end
+        
+        end -- End Locked Anim Check
     end
     
     -- Clean up dead units and check for Castle Damage / Summon Cancellation

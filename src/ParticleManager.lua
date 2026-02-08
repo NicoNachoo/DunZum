@@ -10,6 +10,30 @@ function ParticleManager:new()
     love.graphics.rectangle('fill', 0, 0, 2, 2)
     love.graphics.setCanvas()
     self.texture = canvas
+    
+    self.spriteEffects = {}
+    
+    -- Load Heal Effect
+    if love.filesystem.getInfo(HEAL_EFFECT.texture) then
+        self.healEffectImg = love.graphics.newImage(HEAL_EFFECT.texture)
+        self.healEffectQuads = {}
+        local fw = self.healEffectImg:getWidth() / HEAL_EFFECT.frames
+        local fh = self.healEffectImg:getHeight()
+        for i = 0, HEAL_EFFECT.frames - 1 do
+            table.insert(self.healEffectQuads, love.graphics.newQuad(i * fw, 0, fw, fh, self.healEffectImg:getDimensions()))
+        end
+    end
+    
+    -- Load Priest Attack Effect
+    if love.filesystem.getInfo(PRIEST_ATTACK_EFFECT.texture) then
+        self.priestAttackEffectSprite = love.graphics.newImage(PRIEST_ATTACK_EFFECT.texture)
+        self.priestAttackEffectQuads = {}
+        local fw = self.priestAttackEffectSprite:getWidth() / PRIEST_ATTACK_EFFECT.frames
+        local fh = self.priestAttackEffectSprite:getHeight()
+        for i = 0, PRIEST_ATTACK_EFFECT.frames - 1 do
+            table.insert(self.priestAttackEffectQuads, love.graphics.newQuad(i * fw, 0, fw, fh, self.priestAttackEffectSprite:getDimensions()))
+        end
+    end
 end
 
 function ParticleManager:spawnChargeEffect(x, y, color)
@@ -68,15 +92,28 @@ function ParticleManager:spawnFireExplosion(x, y)
     table.insert(self.systems, { ps = ps, x = x, y = y })
 end
 
-function ParticleManager:spawnHealEffect(x, y)
-    local ps = love.graphics.newParticleSystem(self.texture, 16)
-    ps:setParticleLifetime(0.5, 1.0)
-    ps:setLinearAcceleration(-10, -30, 10, -10) -- Float up gently
-    ps:setColors(0, 1, 0.2, 1, 0, 1, 0.2, 0) -- Green fade
-    
-    ps:emit(8)
-    
-    table.insert(self.systems, { ps = ps, x = x, y = y })
+function ParticleManager:spawnHealEffectSprite(x, y)
+    if not self.healEffectImg then return end
+    table.insert(self.spriteEffects, {
+        type = 'HEAL',
+        x = x,
+        y = y,
+        timer = 0,
+        duration = HEAL_EFFECT.duration * HEAL_EFFECT.frames,
+        frameDuration = HEAL_EFFECT.duration
+    })
+end
+
+function ParticleManager:spawnPriestAttackEffect(x, y)
+    if not self.priestAttackEffectSprite then return end
+    table.insert(self.spriteEffects, {
+        type = 'PRIEST_ATTACK',
+        x = x,
+        y = y,
+        timer = 0,
+        duration = PRIEST_ATTACK_EFFECT.duration * PRIEST_ATTACK_EFFECT.frames,
+        frameDuration = PRIEST_ATTACK_EFFECT.duration
+    })
 end
 
 function ParticleManager:spawnPortalEffect(x, y)
@@ -136,11 +173,42 @@ function ParticleManager:update(dt)
             table.remove(self.systems, i)
         end
     end
+    
+    for i = #self.spriteEffects, 1, -1 do
+        local effect = self.spriteEffects[i]
+        effect.timer = effect.timer + dt
+        if effect.timer >= effect.duration then
+            table.remove(self.spriteEffects, i)
+        end
+    end
 end
 
 function ParticleManager:render()
     for _, system in ipairs(self.systems) do
         love.graphics.draw(system.ps, system.x, system.y)
+    end
+    
+    love.graphics.setColor(1, 1, 1, 1)
+    for _, effect in ipairs(self.spriteEffects) do
+        local img, quads, scale
+        if effect.type == 'HEAL' then
+             img = self.healEffectImg
+             quads = self.healEffectQuads
+             scale = HEAL_EFFECT.scale
+        elseif effect.type == 'PRIEST_ATTACK' then
+             img = self.priestAttackEffectSprite
+             quads = self.priestAttackEffectQuads
+             scale = PRIEST_ATTACK_EFFECT.scale
+        end
+        
+        if img and quads then
+            local frame = math.floor(effect.timer / effect.frameDuration) + 1
+            if frame <= #quads then
+                 local quad = quads[frame]
+                 local _, _, w, h = quad:getViewport()
+                 love.graphics.draw(img, quad, effect.x, effect.y, 0, scale, scale, w/2, h/2)
+            end
+        end
     end
 end
 

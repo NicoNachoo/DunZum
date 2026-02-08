@@ -43,8 +43,9 @@ function Demon:new(x, y, width, height, color, speed, attackRange, originalCost,
     self.animationSpeed = 0.15
     
     -- Voidwalker Shield State
-    self.maxShield = 50 
-    self.currentShield = self.maxShield
+    -- Use MANA as SHIELD
+    self.maxMana = 50 
+    self.mana = self.maxMana
     self.isEnraged = false
 end
 
@@ -91,7 +92,6 @@ function Demon:update(dt, playState)
                 end
             else
                 -- Normal Attack logic
-                self.attackTimer = self.attackTimer + dt
                 if self.attackTimer >= self.attackRate then
                     self.attackTimer = 0
                     if self.attackRange > 20 then
@@ -106,7 +106,6 @@ function Demon:update(dt, playState)
             self.state = 'WALK'
             self.target = nil
             self.chargeTimer = 0
-            self.attackTimer = 0
             -- Don't reset cooldown here, it persists
         end
     end
@@ -146,13 +145,13 @@ end
 
 function Demon:takeDamage(amount, playState, attacker)
     if self.demonType == 'VOIDWALKER' then
-        if self.currentShield > 0 then
+        if self.mana > 0 then
             -- Shield takes damage
-            self.currentShield = self.currentShield - amount
+            self.mana = self.mana - amount
             
             -- Check for Rage Trigger
-            if self.currentShield <= 0 then
-                self.currentShield = 0
+            if self.mana <= 0 then
+                self.mana = 0
                 self.isEnraged = true
                 self.damage = self.damage * 1.5 -- Rage Damage Buff
                 self.attackRate = self.attackRate * 0.5 -- Rage Attack Speed Buff (Lower is faster)
@@ -186,8 +185,8 @@ end
 function Demon:render()
     -- Draw Shield for Voidwalker
     if self.demonType == 'VOIDWALKER' and not self.dead then
-        if self.currentShield > 0 then
-            love.graphics.setColor(0.2, 0.2, 1, 0.3 + (self.currentShield/self.maxShield) * 0.3)
+        if self.mana > 0 then
+            love.graphics.setColor(0.2, 0.2, 1, 0.3 + (self.mana/self.maxMana) * 0.3)
             love.graphics.circle('fill', self.x + self.width/2, self.y + self.height/2, self.width/2 + 6)
             love.graphics.setColor(0.4, 0.4, 1, 0.8)
             love.graphics.setLineWidth(2)
@@ -204,6 +203,10 @@ function Demon:render()
         
         -- Draw HP Bar for Imp (Smaller and centered: 16px wide, 4px offset)
         self:renderHealthBar(16, 4)
+        -- Draw Mana Bar for Imp if used
+        if self.maxMana > 0 then
+            self:renderManaBar(16, 4)
+        end
     else
         Demon.super.render(self)
     end

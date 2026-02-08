@@ -22,10 +22,19 @@ HERO_SPAWN_RATE = 4 -- Seconds between spawns
 
 HERO_ANIMATIONS = {
     ['KNIGHT'] = {
-        ['WALK']    = { texture = 'imgs/Knight/Knight_Run.png', frames = 6, duration = 0.1, scale = 0.2 },
-        ['IDLE']    = { texture = 'imgs/Knight/Knight_Idle.png', frames = 8, duration = 0.1, scale = 0.2 },
-        ['ATTACK1'] = { texture = 'imgs/Knight/Knight_Attack1.png', frames = 4, duration = 0.1, scale = 0.2 },
-        ['ATTACK2'] = { texture = 'imgs/Knight/Knight_Attack2.png', frames = 4, duration = 0.1, scale = 0.2 },
-        ['GUARD']   = { texture = 'imgs/Knight/Knight_Guard.png', frames = 6, duration = 0.1, scale = 0.2 }
+        ['WALK']    = { texture = 'imgs/Knight/Knight_Run.png', frames = 6, duration = 0.075, scale = 0.2 },
+        ['IDLE']    = { texture = 'imgs/Knight/Knight_Idle.png', frames = 8, duration = 0.075, scale = 0.2 },
+        ['ATTACK1'] = { texture = 'imgs/Knight/Knight_Attack1.png', frames = 4, duration = 0.075, scale = 0.2 },
+        ['ATTACK2'] = { texture = 'imgs/Knight/Knight_Attack2.png', frames = 4, duration = 0.075, scale = 0.2 },
+        ['GUARD']   = { texture = 'imgs/Knight/Knight_Guard.png', frames = 6, duration = 0.075, scale = 0.2 }
+    },
+    ['PRIEST'] = {
+        ['WALK']   = { texture = 'imgs/Healer/Healer_Run.png', frames = 4, duration = 0.075, scale = 0.2 },
+        ['IDLE']   = { texture = 'imgs/Healer/Healer_Idle.png', frames = 6, duration = 0.075, scale = 0.2 },
+        ['ATTACK'] = { texture = 'imgs/Healer/Healer_Heal.png', frames = 11, duration = 0.075, scale = 0.2 },
+        ['GUARD']  = { texture = 'imgs/Healer/Healer_Idle.png', frames = 6, duration = 0.075, scale = 0.2 } -- Fallback
     }
 }
+
+HEAL_EFFECT = { texture = 'imgs/Healer/Heal_Effect.png', frames = 11, duration = 0.075, scale = 0.2 }
+PRIEST_ATTACK_EFFECT = { texture = 'imgs/Healer/Attack_Effect.png', frames = 11, duration = 0.075, scale = 0.2 }
