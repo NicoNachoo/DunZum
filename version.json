@@ -64,17 +64,17 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "9e489d7e963bf7632262d9ea4640087e"
+            "md5": "9dc4bdd9410fa5849a43621f333fe906"
         },
         {
             "path": "src/Demon.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Demon.lua",
-            "md5": "a24bcbb3d34742ccf1c69c05283fb1b3"
+            "md5": "8ff0b870afc721ca020366373b84d6e8"
         },
         {
             "path": "src/ParticleManager.lua",
             "url": "https://niconachoo.github.io/DunZum/src/ParticleManager.lua",
-            "md5": "322f78e5311e0fa4dbf537d748eb2c39"
+            "md5": "cf4c7c4383a801b0df45436c544a11f4"
         },
         {
             "path": "src/HUD.lua",
@@ -84,7 +84,7 @@
         {
             "path": "src/Hero.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Hero.lua",
-            "md5": "7a9c75d97f60c1a3b23533b052aeb4b7"
+            "md5": "d6ed8d3f6e6c667ec57da6e29902c8a4"
         },
         {
             "path": "src/Dependencies.lua",
@@ -94,7 +94,7 @@
         {
             "path": "src/Entity.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Entity.lua",
-            "md5": "2b97f928c1629d996ee406d6dbbc3f4d"
+            "md5": "121f380f4b11bd4a35448087b324df52"
         },
         {
             "path": "src/Utils.lua",
@@ -109,7 +109,7 @@
         {
             "path": "src/states/PlayState.lua",
             "url": "https://niconachoo.github.io/DunZum/src/states/PlayState.lua",
-            "md5": "490911eaf8a847c2bfa8074681dd671e"
+            "md5": "7627a1d7f91f44e706439beb14ad654d"
         },
         {
             "path": "src/states/MenuState.lua",
@@ -190,6 +190,36 @@
             "path": "imgs/scroll-upgrade.png",
             "url": "https://niconachoo.github.io/DunZum/imgs/scroll-upgrade.png",
             "md5": "35d79fd62279705292fd5e41d3c17f4c"
+        },
+        {
+            "path": "imgs/Healer/Healer_Heal.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Healer_Heal.png",
+            "md5": "e4ce75f2ef84a945e245a85025ed257d"
+        },
+        {
+            "path": "imgs/Healer/Healer_Run.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Healer_Run.png",
+            "md5": "d19add713f5b3df21b2f23c47f8e784a"
+        },
+        {
+            "path": "imgs/Healer/Attack_Effect.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Attack_Effect.png",
+            "md5": "1f6e59851dc52475a6814ada71f7fc8f"
+        },
+        {
+            "path": "imgs/Healer/Heal_Effect.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Heal_Effect.png",
+            "md5": "c5eedb62c5d5654a59ec196af65f9ca0"
+        },
+        {
+            "path": "imgs/Healer/Healer_Attack.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Healer_Attack.png",
+            "md5": "13ef832137dbf59a57cde2fa713e0613"
+        },
+        {
+            "path": "imgs/Healer/Healer_Idle.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Healer_Idle.png",
+            "md5": "0b21c1421d6fb6ba16e21d4a5bc8013a"
         },
         {
             "path": "imgs/Knight/Knight_Run.png",
