@@ -1,5 +1,5 @@
 {
-    "version": "0.1.13",
+    "version": "0.1.14",
     "files": [
         {
             "path": "main.lua",
@@ -29,7 +29,7 @@
         {
             "path": "src/Projectile.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Projectile.lua",
-            "md5": "faf766418ebe1b3a491609451bbcff69"
+            "md5": "fa26bb7b00e21ee225665b9db6b62db2"
         },
         {
             "path": "src/downloader_thread.lua",
@@ -39,7 +39,7 @@
         {
             "path": "src/HeroSpriteManager.lua",
             "url": "https://niconachoo.github.io/DunZum/src/HeroSpriteManager.lua",
-            "md5": "703ca224fae83a9f6ee54a28d4024629"
+            "md5": "1545917a11a801dba9422388ef13c224"
         },
         {
             "path": "src/MusicManager.lua",
@@ -64,7 +64,7 @@
         {
             "path": "src/Constants.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Constants.lua",
-            "md5": "3497d1921afc80bede393ae5d00d5966"
+            "md5": "2fb8e42568484dcfa90046127256454f"
         },
         {
             "path": "src/Demon.lua",
@@ -74,7 +74,7 @@
         {
             "path": "src/ParticleManager.lua",
             "url": "https://niconachoo.github.io/DunZum/src/ParticleManager.lua",
-            "md5": "cf4c7c4383a801b0df45436c544a11f4"
+            "md5": "3fa86cd000d852786e22f31d28bdba3a"
         },
         {
             "path": "src/HUD.lua",
@@ -84,7 +84,7 @@
         {
             "path": "src/Hero.lua",
             "url": "https://niconachoo.github.io/DunZum/src/Hero.lua",
-            "md5": "d6ed8d3f6e6c667ec57da6e29902c8a4"
+            "md5": "4bb6b236ede1c4f919e45b093e2101e7"
         },
         {
             "path": "src/Dependencies.lua",
@@ -192,6 +192,21 @@
             "md5": "35d79fd62279705292fd5e41d3c17f4c"
         },
         {
+            "path": "imgs/Assassin/Assassin_Run.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Assassin/Assassin_Run.png",
+            "md5": "fd4f1221dd34f2d222f6c4a12433987e"
+        },
+        {
+            "path": "imgs/Assassin/Assassin_Attack.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Assassin/Assassin_Attack.png",
+            "md5": "a180fc9669b122a3c2562f98d4a45146"
+        },
+        {
+            "path": "imgs/Assassin/Assassin_Idle.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Assassin/Assassin_Idle.png",
+            "md5": "40df937863a4110cc9be0a557c398199"
+        },
+        {
             "path": "imgs/Healer/Healer_Heal.png",
             "url": "https://niconachoo.github.io/DunZum/imgs/Healer/Healer_Heal.png",
             "md5": "e4ce75f2ef84a945e245a85025ed257d"
@@ -245,6 +260,26 @@
             "path": "imgs/Knight/Knight_Attack1.png",
             "url": "https://niconachoo.github.io/DunZum/imgs/Knight/Knight_Attack1.png",
             "md5": "d5efda4b2b646442a318118f08a95b32"
+        },
+        {
+            "path": "imgs/Archer/Arrow.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Archer/Arrow.png",
+            "md5": "b3a4265d26142c4d7891304abc69dfcc"
+        },
+        {
+            "path": "imgs/Archer/Archer_Shoot.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Archer/Archer_Shoot.png",
+            "md5": "d61d5f3124913141eefdc6ccf746e1ab"
+        },
+        {
+            "path": "imgs/Archer/Archer_Run.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Archer/Archer_Run.png",
+            "md5": "e7edc932e7d5a812beae15249ddd3007"
+        },
+        {
+            "path": "imgs/Archer/Archer_Idle.png",
+            "url": "https://niconachoo.github.io/DunZum/imgs/Archer/Archer_Idle.png",
+            "md5": "1fc32164ff88ac7caa22f2ba8f8bebbd"
         },
         {
             "path": "lib/json.lua",
