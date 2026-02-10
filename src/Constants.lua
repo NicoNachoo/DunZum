@@ -6,7 +6,7 @@ VIRTUAL_HEIGHT = 243
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
-GAME_VERSION = "0.1.14"
+GAME_VERSION = "0.1.15"
 UPDATE_URL = "https://niconachoo.github.io/DunZum/version.json" -- GitHub Pages URL
 
 -- Gameplay Constants
