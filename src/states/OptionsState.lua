@@ -2,12 +2,12 @@ local OptionsState = BaseState:extend()
 
 function OptionsState:new()
     self.menuItems = {
-        { text = "FULLSCREEN: OFF", action = function() 
+        { text = "Fullscreen: Off", action = function() 
             local _, _, flags = love.window.getMode()
             love.window.setFullscreen(not flags.fullscreen)
             self:refreshStrings()
         end },
-        { text = "RESOLUTION: 1280x720", action = function()
+        { text = "Resolution: 1280x720", action = function()
             local _, _, flags = love.window.getMode()
             if flags.fullscreen then return end -- Block in fullscreen
 
@@ -17,14 +17,14 @@ function OptionsState:new()
             love.window.setMode(conf.w, conf.h, {fullscreen = flags.fullscreen, resizable = true})
             self:refreshStrings()
         end },
-        { text = "MUSIC VOLUME: 100%", action = function()
+        { text = "Music Volume: 100%", action = function()
             local vol = MusicManager:getVolume()
             vol = vol + 0.25
             if vol > 1.0 then vol = 0 end
             MusicManager:setVolume(vol)
             self:refreshStrings()
         end },
-        { text = "BACK", action = function() gStateMachine:pop() end }
+        { text = "Back", action = function() gStateMachine:pop() end }
     }
     
     self.highlightedIndex = 1
@@ -34,11 +34,11 @@ end
 
 function OptionsState:refreshStrings()
     local w, h, flags = love.window.getMode()
-    self.menuItems[1].text = "FULLSCREEN: " .. (flags.fullscreen and "ON" or "OFF")
-    self.menuItems[2].text = "RESOLUTION: " .. w .. "x" .. h
+    self.menuItems[1].text = "Fullscreen: " .. (flags.fullscreen and "On" or "Off")
+    self.menuItems[2].text = "Resolution: " .. w .. "x" .. h
     
     local vol = math.floor(MusicManager:getVolume() * 100 + 0.5)
-    self.menuItems[3].text = "MUSIC VOLUME: " .. vol .. "%"
+    self.menuItems[3].text = "Music Volume: " .. vol .. "%"
     
     local configs = {{w=1280, h=720}, {w=1600, h=900}, {w=1920, h=1080}}
     for i, conf in ipairs(configs) do
@@ -122,7 +122,7 @@ function OptionsState:renderUI()
     
     love.graphics.setFont(gFonts['large'])
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf("OPTIONS", 0, 40, winW, 'center')
+    love.graphics.printfOutline("Options", 0, 40, winW, 'center')
     
     love.graphics.setFont(gFonts['medium'])
     for i, item in ipairs(self.menuItems) do
@@ -131,7 +131,7 @@ function OptionsState:renderUI()
         -- Special Draw for Volume Slider (Item 3)
         if i == 3 then
             love.graphics.setColor(1, 1, 1, 1)
-            local label = "MUSIC VOLUME"
+            local label = "Music Volume"
             local labelW = gFonts['medium']:getWidth(label)
             local x = (winW - labelW) / 2
             
@@ -150,7 +150,7 @@ function OptionsState:renderUI()
             end
             
             -- Draw Label
-            love.graphics.print(label, x, y)
+            love.graphics.printOutline(label, x, y)
             
             -- Draw Slider
             local sliderW = 200
@@ -174,7 +174,7 @@ function OptionsState:renderUI()
             
             -- Percentage Text
             love.graphics.setFont(gFonts['small'])
-            love.graphics.printf(math.floor(vol * 100) .. "%", 0, sliderY + 15, winW, 'center')
+            love.graphics.printfOutline(math.floor(vol * 100) .. "%", 0, sliderY + 15, winW, 'center')
             love.graphics.setFont(gFonts['medium'])
             
         else
@@ -201,7 +201,7 @@ function OptionsState:renderUI()
                 end
             end
             
-            love.graphics.print(item.text, x, y)
+            love.graphics.printOutline(item.text, x, y)
         end
     end
 end

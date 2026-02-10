@@ -46,3 +46,39 @@ function DrawPentagramLine(x, y, radius, rotation)
     -- Circle
     love.graphics.circle('line', x, y, radius)
 end
+
+function love.graphics.printfOutline(text, x, y, limit, align, r, sx, sy, ox, oy, kx, ky)
+    local originalColor = {love.graphics.getColor()}
+    local steps = 2
+    local alpha = originalColor[4]
+    
+    love.graphics.setColor(0, 0, 0, alpha)
+    for dx = -steps, steps, steps do
+        for dy = -steps, steps, steps do
+            if dx ~= 0 or dy ~= 0 then
+                love.graphics.printf(text, x + dx, y + dy, limit, align, r, sx, sy, ox, oy, kx, ky)
+            end
+        end
+    end
+    
+    love.graphics.setColor(unpack(originalColor))
+    love.graphics.printf(text, x, y, limit, align, r, sx, sy, ox, oy, kx, ky)
+end
+
+function love.graphics.printOutline(text, x, y, r, sx, sy, ox, oy, kx, ky)
+    local originalColor = {love.graphics.getColor()}
+    local steps = 2
+    local alpha = originalColor[4]
+    
+    love.graphics.setColor(0, 0, 0, alpha)
+    for dx = -steps, steps, steps do
+        for dy = -steps, steps, steps do
+            if dx ~= 0 or dy ~= 0 then
+                love.graphics.print(text, x + dx, y + dy, r, sx, sy, ox, oy, kx, ky)
+            end
+        end
+    end
+    
+    love.graphics.setColor(unpack(originalColor))
+    love.graphics.print(text, x, y, r, sx, sy, ox, oy, kx, ky)
+end

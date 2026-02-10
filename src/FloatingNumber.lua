@@ -28,7 +28,7 @@ function FloatingNumber:render()
     local alpha = 1 - (self.timer / self.duration)
     love.graphics.setColor(self.color[1], self.color[2], self.color[3], alpha)
     love.graphics.setFont(gFonts['tiny'])
-    love.graphics.print(self.text, self.x, self.y)
+    love.graphics.printOutline(self.text, self.x, self.y)
     love.graphics.setColor(1, 1, 1, 1)
 end
 

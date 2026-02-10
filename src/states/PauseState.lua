@@ -2,8 +2,8 @@ local PauseState = BaseState:extend()
 
 function PauseState:new()
     self.menuItems = {
-        { text = "RESUME", action = function() gStateMachine:pop() end },
-        { text = "SAVE & QUIT", action = function() 
+        { text = "Resume", action = function() gStateMachine:pop() end },
+        { text = "Save & Quit", action = function() 
             -- Note: We need a reference to PlayState to save
             -- In our current stack machine, PlayState is stack[#stack-1]
             local playState = gStateMachine.stack[#gStateMachine.stack - 1]
@@ -19,8 +19,8 @@ function PauseState:new()
                 gStateMachine:change('menu') -- If no playState or save function, just go to menu
             end
         end },
-        { text = "OPTIONS", action = function() gStateMachine:push('options') end },
-        { text = "EXIT", action = function() 
+        { text = "Options", action = function() gStateMachine:push('options') end },
+        { text = "Exit", action = function() 
             local playState = gStateMachine.stack[#gStateMachine.stack - 1]
             if playState and playState.save then
                 playState:save()
@@ -86,7 +86,7 @@ function PauseState:renderUI()
     
     love.graphics.setFont(gFonts['large'])
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf("PAUSED", 0, 40, winW, 'center')
+    love.graphics.printfOutline("Paused", 0, 40, winW, 'center')
     
     love.graphics.setFont(gFonts['medium'])
     for i, item in ipairs(self.menuItems) do
@@ -108,7 +108,7 @@ function PauseState:renderUI()
             love.graphics.setColor(1, 1, 1, 1)
         end
         
-        love.graphics.print(item.text, x, y)
+        love.graphics.printOutline(item.text, x, y)
     end
 end
 

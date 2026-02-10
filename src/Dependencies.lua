@@ -13,6 +13,7 @@ require 'src/Utils'
 SettingsManager = require 'src/SettingsManager'
 MusicManager = require 'src/MusicManager'
 InputManager = require 'src/InputManager'
+require 'src/Shaders'
 
 --
 -- Game States
@@ -25,6 +26,7 @@ MenuState = require 'src/states/MenuState'
 OptionsState = require 'src/states/OptionsState'
 PauseState = require 'src/states/PauseState'
 UpdateState = require 'src/states/UpdateState'
+TutorialState = require 'src/states/TutorialState'
 
 --
 -- Game Objects

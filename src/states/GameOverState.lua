@@ -22,7 +22,7 @@ function GameOverState:renderUI()
     
     love.graphics.setFont(gFonts['large'])
     love.graphics.setColor(1, 0, 0, 1)
-    love.graphics.printf(
+    love.graphics.printfOutline(
         'GAME OVER', 
         0, 
         winH / 2 - 60, 
@@ -32,7 +32,7 @@ function GameOverState:renderUI()
     
     love.graphics.setFont(gFonts['medium'])
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf(
+    love.graphics.printfOutline(
         'Press Enter to Restart', 
         0, 
         winH / 2 + 20, 

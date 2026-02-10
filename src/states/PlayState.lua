@@ -120,32 +120,9 @@ function PlayState:enter(params)
     -- We should change PlayState to add to self.hud.meditateParticles?
     -- Yes. So we don't need self.meditateParticles here if we fix the references.
     
-    -- Tutorial State (Logic only)
+    -- Tutorial State (Legacy removed, handled by TutorialState)
     self.tutorialSeen = data and data.tutorialSeen or false
-    self.showTutorial = not self.tutorialSeen
-    self.tutorialStep = 1
-    self.tutorialSteps = {
-        {
-            title = "Welcome, Dark Lord",
-            text = "The 'Heroes' are invading your realm. Defend the castle at the left cost at all costs! Use your mana to summon demons and cast spells."
-        },
-        {
-            title = "Summoning Minions",
-            text = "Select a lane using W/S or Mouse. Press ENTER and type a name like 'IMP' or 'VOIDWALKER' to spawn them. They will walk and attack automatically."
-        },
-        {
-            title = "Mana & Meditation",
-            text = "Your mana is limited. Reach out to the void by typing 'MEDITATE'. You will channel mana much faster, but you cannot summon while doing so."
-        },
-        {
-            title = "The Grimoire",
-            text = "Press TAB to open your Grimoire. Here you can see unit stats and purchase permanent Boons (Upgrades) using the Souls of fallen heroes."
-        },
-        {
-            title = "Victory Awaits",
-            text = "Survive the waves of heroes. As they grow stronger, so must you. Good luck!"
-        }
-    }
+    self.showTutorial = false
 end
 
 function PlayState:serializeState()
@@ -234,7 +211,7 @@ function PlayState:update(dt)
     self.hud:update(dt)
 
     -- Global Input (Pause)
-    if InputManager:wasPressed('back') then
+    if not self.disableInput and InputManager:wasPressed('back') then
         if self.hud.showGrimoire then
             self.hud.showGrimoire = false
         elseif self.isTyping then
@@ -246,7 +223,7 @@ function PlayState:update(dt)
     end
     
     -- Grimoire Toggle (Tab)
-    if love.keyboard.wasPressed('tab') then
+    if not self.disableInput and love.keyboard.wasPressed('tab') then
         self.hud.showGrimoire = not self.hud.showGrimoire
         if self.hud.showGrimoire then
             self.hud.grimoirePage = 1 -- Reset to first page
@@ -255,7 +232,7 @@ function PlayState:update(dt)
     end
 
     -- Grimoire Navigation
-    if self.hud.showGrimoire then
+    if self.hud.showGrimoire and not self.disableInput then
         if InputManager:wasPressed('left') then
             self.hud.grimoirePage = math.max(1, self.hud.grimoirePage - 1)
             self.hud.boonScrollOffset = 0
@@ -289,18 +266,22 @@ function PlayState:update(dt)
     if self.hud.showGrimoire then
         return
     end
-    
-    -- Tutorial Logic
-    if self.showTutorial then
-        if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('return') or love.mouse.wasPressed(1) then
-            self.tutorialStep = self.tutorialStep + 1
-            if self.tutorialStep > #self.tutorialSteps then
-                self.showTutorial = false
-                self.tutorialSeen = true
-                self:save() -- Persist that they've seen it
+
+    if self.disableInput then
+        -- Skip normal input
+    else
+        -- Tutorial Logic (Consumes input)
+        if self.showTutorial then
+            if love.keyboard.wasPressed('space') or love.keyboard.wasPressed('return') or love.mouse.wasPressed(1) then
+                self.tutorialStep = self.tutorialStep + 1
+                if self.tutorialStep > #self.tutorialSteps then
+                    self.showTutorial = false
+                    self.tutorialSeen = true
+                    self:save() -- Persist that they've seen it
+                end
             end
+            return -- Pause game logic during tutorial
         end
-        return -- Pause game logic during tutorial
     end
     
     -- Update Particles
@@ -318,7 +299,7 @@ function PlayState:update(dt)
     end
 
     -- Mouse Selection Logic
-    if not self.showGrimoire and not self.isTyping then
+    if not self.showGrimoire and not self.isTyping and not self.disableInput then
         local mouseX, mouseY = love.mouse.getPosition()
         local winW, winH = love.graphics.getWidth(), love.graphics.getHeight()
         
@@ -380,7 +361,7 @@ function PlayState:update(dt)
     end
     
     -- Selection / Typing Logic (Only if not in Grimoire)
-    if not self.showGrimoire then
+    if not self.showGrimoire and not self.disableInput then
         if self.isTyping then
             if love.keyboard.wasPressed('backspace') then
                 self.inputBuffer = string.sub(self.inputBuffer, 1, -2)
@@ -408,9 +389,9 @@ function PlayState:update(dt)
         local p = self.projectiles[i]
         p:update(dt)
         
-        if p.dead then
+        if p.remove then
             table.remove(self.projectiles, i)
-        else
+        elseif not p.dead then
             -- Check collision
             local hit = false
             for _, unit in pairs(self.activeUnits) do
@@ -421,7 +402,10 @@ function PlayState:update(dt)
                         unit.y < p.y + p.height and unit.y + unit.height > p.y then
                         
                         unit:takeDamage(p.damage, self, p.source)
-                        gParticleManager:spawnFireExplosion(p.x + p.width/2, p.y + p.height/2)
+                        -- Local explosion effect is now handled by projectile itself if animated
+                        if not p.isAnimated then
+                            gParticleManager:spawnFireExplosion(p.x + p.width/2, p.y + p.height/2)
+                        end
                         hit = true
                         break
                      end
@@ -439,8 +423,7 @@ function PlayState:update(dt)
             end
             
             if hit then
-                p.dead = true
-                table.remove(self.projectiles, i)
+                p:explode()
             elseif p.target and p.target.dead then
                  -- If homing target died, keep flying (linear)
             end

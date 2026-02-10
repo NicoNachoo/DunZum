@@ -279,7 +279,7 @@ function HUD:render()
     love.graphics.printf(ps.souls .. " Souls", winW - (220 * layoutScale), 50 * layoutScale, 200 * layoutScale, 'right', 0, 1, 1)
     
     love.graphics.setColor(1, 1, 0, 1)
-    love.graphics.print('Wave: ' .. ps.wave, winW / 2 - (50 * layoutScale), 20 * layoutScale, 0, 1, 1)
+    love.graphics.printOutline('Wave: ' .. ps.wave, winW / 2 - (50 * layoutScale), 20 * layoutScale, 0, 1, 1)
     love.graphics.setColor(1, 1, 1, 1)
     
     -- 4. Typing Buffer
@@ -387,7 +387,7 @@ function HUD:renderGrimoire(winW, winH, layoutScale)
     local spellKey = self.grimoireSpells[self.grimoirePage]
     local spell = Grimoire[spellKey]
     
-    if spellKey == 'UPGRADES_LOG' then
+        if spellKey == 'UPGRADES_LOG' then
         -- Left Page Title
         love.graphics.setColor(0.2, 0.1, 0, 1) 
         love.graphics.setFont(getNativeFont(16)) -- Base 16px
@@ -439,7 +439,7 @@ function HUD:renderGrimoire(winW, winH, layoutScale)
                     displayName = displayName .. " x" .. upgrade.count
                 end
                 
-                love.graphics.print("- " .. displayName, rightPageX, yOffset + (10 * layoutScale))
+                love.graphics.printOutline("- " .. displayName, rightPageX, yOffset + (10 * layoutScale))
                 yOffset = yOffset + (25 * layoutScale) 
                 
                 love.graphics.setFont(getNativeFont(10)) 

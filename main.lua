@@ -5,32 +5,29 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     -- love.math.random is automatically seeded by LÖVE on startup
-    
-    -- Initialize Fonts
-    local smallFont = love.graphics.newFont('fonts/pixel.ttf', 8)
-    smallFont:setFilter('nearest', 'nearest')
-    
-    local tinyFont = love.graphics.newFont('fonts/pixel.ttf', 6)
-    tinyFont:setFilter('nearest', 'nearest')
-    
+
     -- Load Music
     MusicManager:addTrack('main_theme', 'music/Breakout_01.mp3')
     MusicManager:addTrack('menu_theme', 'music/Title_Screen_v0.mp3')
     
-    local mediumFont = love.graphics.newFont('fonts/pixel.ttf', 16)
-    mediumFont:setFilter('nearest', 'nearest')
     
-    local mediumSmallFont = love.graphics.newFont('fonts/pixel.ttf', 12)
-    mediumSmallFont:setFilter('nearest', 'nearest')
-    
-    local largeFont = love.graphics.newFont('fonts/pixel.ttf', 32)
-    largeFont:setFilter('nearest', 'nearest')
+    -- Initialize Fonts
+    local fontName = 'fonts/PressStart2P-Regular.ttf'
 
-    local xlargeFont = love.graphics.newFont('fonts/pixel.ttf', 24)
-    xlargeFont:setFilter('nearest', 'nearest')
-    
-    local hugeFont = love.graphics.newFont('fonts/pixel.ttf', 48)
-    hugeFont:setFilter('nearest', 'nearest')
+    local function loadFont(path, size)
+        local rasterizer = love.font.newRasterizer(path, size, 'normal')
+        local font = love.graphics.newFont(rasterizer)
+        font:setFilter('nearest', 'nearest')
+        return font
+    end
+
+    local tinyFont = loadFont(fontName, 6)
+    local smallFont = loadFont(fontName, 8)
+    local mediumSmallFont = loadFont(fontName, 12)
+    local mediumFont = loadFont(fontName, 16)
+    local xlargeFont = loadFont(fontName, 24)
+    local largeFont = loadFont(fontName, 32)
+    local hugeFont = loadFont(fontName, 48)
     
     gFonts = {
         ['tiny'] = tinyFont,
@@ -51,7 +48,8 @@ function love.load()
         ['upgrade'] = function() return UpgradeState() end,
         ['options'] = function() return OptionsState() end,
         ['pause'] = function() return PauseState() end,
-        ['gameover'] = function() return GameOverState() end
+        ['gameover'] = function() return GameOverState() end,
+        ['tutorial'] = function() return TutorialState() end
     }
     gStateMachine:change('menu')
 
@@ -146,6 +144,6 @@ end
 function displayFPS()
     love.graphics.setColor(0, 1, 0, 1)
     love.graphics.setFont(love.graphics.newFont(8))
-    love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 4, 4)
+    love.graphics.printOutline('FPS: ' .. tostring(love.timer.getFPS()), 4, 4)
     love.graphics.setColor(1, 1, 1, 1)
 end

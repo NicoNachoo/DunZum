@@ -50,3 +50,16 @@ HERO_ANIMATIONS = {
         ['GUARD']  = { texture = 'imgs/Assassin/Assassin_Idle.png', frames = 8, duration = 0.075, scale = 0.2 }, -- Fallback
     }
 }
+
+DEMON_ANIMATIONS = {
+    ['IMP'] = {
+        ['WALK']   = { texture = 'imgs/Imp/Imp_Run.png', frames = 6, duration = 0.1, scale = 0.5 },
+        ['IDLE']   = { texture = 'imgs/Imp/Imp_Idle.png', frames = 6, duration = 0.1, scale = 0.5 },
+        ['ATTACK'] = { texture = 'imgs/Imp/Imp_Attack.png', frames = 6, duration = 0.1, scale = 0.5 },
+        ['DEATH']  = { texture = 'imgs/Imp/Imp_Dead.png', frames = 6, duration = 0.1, scale = 0.5 },
+        ['PROJECTILE'] = {
+            ['TRAVEL'] = { texture = 'imgs/Imp/Imp_Fireball_Travel.png', frames = 6, duration = 0.1, scale = 0.5 },
+            ['EXPLODE'] = { texture = 'imgs/Imp/Imp_Fireball_Explode.png', frames = 6, duration = 0.1, scale = 0.5 }
+        }
+    }
+}
